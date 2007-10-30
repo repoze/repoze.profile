@@ -50,7 +50,6 @@ setup(name='repoze.atemplate',
       tests_require = [],
       install_requires=[],
       #test_suite="repoze.",
-      cmdclass = {'sandbox': sandbox},
       entry_points = {
         'console_scripts': [],
       },
