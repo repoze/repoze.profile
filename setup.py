@@ -50,8 +50,7 @@ setup(name='repoze.atemplate',
       tests_require = [],
       install_requires=[],
       #test_suite="repoze.",
-      entry_points = {
-        'console_scripts': [],
-      },
+      entry_points = """\
+      """
       )
 
