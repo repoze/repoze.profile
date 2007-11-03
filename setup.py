@@ -51,6 +51,11 @@ setup(name='repoze.atemplate',
       install_requires=[],
       #test_suite="repoze.",
       entry_points = """\
+        #[console_scripts]
+        #addzope2user = repoze.zope2.scripts.adduser:main
+
+        #[repoze.project]
+        #initialize = repoze.zope2.instance:mkinstance
       """
       )
 
