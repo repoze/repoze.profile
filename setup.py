@@ -52,10 +52,13 @@ setup(name='repoze.atemplate',
       #test_suite="repoze.",
       entry_points = """\
         #[console_scripts]
-        #addzope2user = repoze.zope2.scripts.adduser:main
+        #addzope2user = repoze.atemplate.scripts.adduser:main
 
         #[repoze.project]
-        #initialize = repoze.zope2.instance:mkinstance
+        #initialize = repoze.atemplate.instance:mkinstance
+
+        #[paste.filter_app_factory]
+        #middleware = repoze.atemplate:constructor
       """
       )
 
