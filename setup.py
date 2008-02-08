@@ -24,9 +24,9 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
 
-setup(name='repoze.atemplate',
+setup(name='repoze.profile',
       version=__version__,
-      description='A template for repoze projects',
+      description='Aggregate profiling for WSGI requests',
       long_description=README,
       classifiers=[
         "Development Status :: 1 - Planning",
@@ -51,14 +51,8 @@ setup(name='repoze.atemplate',
       install_requires=[],
       #test_suite="repoze.",
       entry_points = """\
-        #[console_scripts]
-        #addzope2user = repoze.atemplate.scripts.adduser:main
-
-        #[repoze.project]
-        #initialize = repoze.atemplate.instance:mkinstance
-
-        #[paste.filter_app_factory]
-        #middleware = repoze.atemplate:constructor
+      [paste.filter_app_factory]
+      profile = repoze.profile.profiler:make_profile_middleware
       """
       )
 

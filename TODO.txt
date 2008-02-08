@@ -1,1 +1,1 @@
-List todo items here.
+- [_] Package up the profile component into an egg.
