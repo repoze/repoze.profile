@@ -1,1 +1,4 @@
-- [_] Package up the profile component into an egg.
+- [x] Package up the profile component into an egg.
+
+- [_] Rip off the Zope2 control panel profiler view, to display
+      "pretty" stats in the browser.
