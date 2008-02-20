@@ -1,4 +1,4 @@
-repoze.profile 0.2 (2008-02-08)
+repoze.profile 0.2 (2008-02-20)
 
   Add a browser UI.
 
