@@ -20,7 +20,8 @@ Wire the middleware into a pipeline in your Paste configuration::
  use = egg:repoze.profile#profile
  log_filename = myapp.profile
  discard_first_request = true
-
+ path = /__profile__
+ flush_at_shutdown = true
  ...
 
  [pipeline:main]
@@ -40,3 +41,13 @@ The configuration options are as follows:
    initializations which distort measurement of the application's
    normal performance.
 
+ - ``path`` is the URL path to the profiler UI.  It defaults to
+   ``/__profile__``.
+
+ - If ``flush_at_shutdown`` is true (the default), profiling data will
+   be deleted when the middleware instance disappears (via its
+   __del__).  If it's false, profiling data will persist across
+   application restarts.
+
+Once you have some profiling data, you can visit ``path`` in your
+browser to see a user interface displaying profiling statistics.

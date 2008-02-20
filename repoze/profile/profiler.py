@@ -24,6 +24,7 @@ class AccumulatingProfileMiddleware(object):
                  global_conf=None,
                  log_filename=DEFAULT_PROFILE_LOG,
                  discard_first_request=True,
+                 flush_at_shutdown = True,
                  path='/__profile__',
                 ):
         self.app = app
@@ -31,6 +32,7 @@ class AccumulatingProfileMiddleware(object):
         self.log_filename = log_filename
         self.first_request = discard_first_request
         self.lock = threading.Lock()
+        self.flush_at_shutdown = flush_at_shutdown
         self.path = path
         self.template = os.path.join(_HERE, 'profiler.html')
         self.meldroot = meld3.parse_xml(self.template)
@@ -97,6 +99,10 @@ class AccumulatingProfileMiddleware(object):
             formelements.content('')
         return root.write_xhtmlstring()
 
+    def __del__(self):
+        if self.flush_at_shutdown and os.path.exists(self.log_filename):
+            os.remove(self.log_filename)
+
     def __call__(self, environ, start_response):
         catch_response = []
         body = []
@@ -142,7 +148,8 @@ def make_profile_middleware(app,
                             global_conf,
                             log_filename=DEFAULT_PROFILE_LOG,
                             discard_first_request=True,
-                            path='/__profile__'
+                            path='/__profile__',
+                            flush_at_shutdown='true',
                            ):
     """Wrap the application in a component that will profile each
     request, appending data from each request to an aggregate
@@ -157,9 +164,15 @@ def make_profile_middleware(app,
 
     o Ergo, NEVER USE THIS MIDDLEWARE IN PRODUCTION.
     """
+    if flush_at_shutdown.lower().startswith('t'):
+        flush_at_shutdown = 1
+    else:
+        flush_at_shutdown = 0
+        
     return AccumulatingProfileMiddleware(
                 app,
                 log_filename=log_filename,
                 discard_first_request=discard_first_request,
-                path=path
+                flush_at_shutdown=int(flush_at_shutdown),
+                path=path,
                )
