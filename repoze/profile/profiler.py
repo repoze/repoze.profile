@@ -58,13 +58,14 @@ class AccumulatingProfileMiddleware(object):
             if not full_dirs:
                 stats.strip_dirs()
             stats.sort_stats(sort)
-
+            if hasattr(stats, 'stream'):
+                # python 2.5
+                stats.stream = output
             try:
-                orig_stdout = sys.stdout
+                orig_stdout = sys.stdout # python 2.4
                 sys.stdout = output
                 print_fn = getattr(stats, 'print_%s' % mode)
                 print_fn(limit)
-                sys.stdout.flush()
             finally:
                 sys.stdout = orig_stdout
 

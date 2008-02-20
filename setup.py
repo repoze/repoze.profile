@@ -12,7 +12,7 @@
 #
 ##############################################################################
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 import os
 
@@ -47,8 +47,16 @@ setup(name='repoze.profile',
       include_package_data=True,
       namespace_packages=['repoze'],
       zip_safe=False,
-      tests_require = ['meld3', 'Paste'],
-      install_requires=['meld3', 'Paste'],
+      tests_require = [
+                 'meld3',
+                 'Paste',
+                 'elementtree >= 1.2.6, < 1.2.7', # meld3 not setuptools pkg
+                 ],
+      install_requires=[
+                 'meld3',
+                 'Paste',
+                 'elementtree >= 1.2.6, < 1.2.7', # meld3 not setuptools pkg
+                 ],
       test_suite="repoze.profile.tests",
       entry_points = """\
       [paste.filter_app_factory]

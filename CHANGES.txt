@@ -1,3 +1,10 @@
+repoze.profile 0.3 (2008-02-20)
+
+  Compatibility with Python 2.5.
+
+  Depend explicitly on ElementTree 1.2.6 (meld needs it but meld isn't
+  a setuptools package).
+
 repoze.profile 0.2 (2008-02-20)
 
   Add a browser UI.
