@@ -47,9 +47,9 @@ setup(name='repoze.profile',
       include_package_data=True,
       namespace_packages=['repoze'],
       zip_safe=False,
-      tests_require = [],
-      install_requires=[],
-      #test_suite="repoze.",
+      tests_require = ['meld3', 'Paste'],
+      install_requires=['meld3', 'Paste'],
+      test_suite="repoze.profile.tests",
       entry_points = """\
       [paste.filter_app_factory]
       profile = repoze.profile.profiler:make_profile_middleware

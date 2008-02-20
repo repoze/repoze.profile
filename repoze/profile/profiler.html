@@ -1,0 +1,67 @@
+<html xmlns:meld="http://www.plope.com/software/meld3">
+  <head>
+  </head>
+  <body>
+    
+    <div meld:id="description" class="form-text">
+      There is not yet any profiling data to report.
+    </div>
+    
+    <div meld:id="formelements">
+      <form action="." meld:id="form" method="POST">
+        <table>
+          <tr>
+            <td>
+              <strong>Sort</strong>: 
+              <select name="sort" meld:id="sort">
+                <option value="time">time</option>
+                <option value="cumulative">cumulative</option>
+                <option value="calls">calls</option>
+                <option value="pcalls">pcalls</option>
+                <option value="name">name</option>
+                <option value="file">file</option>
+                <option value="module">module</option>
+                <option value="line">line</option>
+                <option value="nfl">nfl</option>
+                <option value="stdname">stdname</option>
+              </select>
+            </td>
+            <td>
+              <strong>Limit</strong>: 
+              <select name="limit" meld:id="limit">
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="300">300</option>
+                <option value="400">400</option>
+                <option value="500">500</option>
+              </select>
+            </td>
+            <td>
+              <strong>Full Dirs</strong>:
+              <input type="checkbox" name="full_dirs" value="1"
+                     meld:id="full_dirs"/>
+            </td>
+            <td>
+              <strong>Mode</strong>: 
+              <select name="mode" meld:id="mode">
+                <option value="stats">stats</option>
+                <option value="callees">callees</option>
+                <option value="callers">callers</option>
+              </select>
+            </td>
+            <td>
+              <input type="submit" name="submit" value="Update"/>
+            </td>
+            <td>
+              <input type="submit" name="clear" value="Clear"/>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    <pre meld:id="profiledata">
+    </pre>
+  </body>
+</html>
+
+
