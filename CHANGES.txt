@@ -1,3 +1,10 @@
+repoze.profile 0.2 (2008-02-08)
+
+  Add a browser UI.
+
+  Add a knob to control discard at shutdown.
+
 repoze.profile 0.1 (2008-02-08)
 
   Initial release.
+
