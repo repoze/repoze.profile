@@ -1,14 +1,17 @@
 <html xmlns:meld="http://www.plope.com/software/meld3">
   <head>
+    <title>repoze.profile results</title>
   </head>
   <body>
     
-    <div meld:id="description" class="form-text">
-      There is not yet any profiling data to report.
-    </div>
+    <form action="." meld:id="form" method="POST">
+
+      <div meld:id="description" class="form-text">
+        There is not yet any profiling data to report.
+        <input type="submit" name="refresh" value="Refresh"/>
+      </div>
     
-    <div meld:id="formelements">
-      <form action="." meld:id="form" method="POST">
+      <div meld:id="formelements">
         <table>
           <tr>
             <td>
@@ -57,8 +60,8 @@
             </td>
           </tr>
         </table>
-      </form>
-    </div>
+      </div>
+    </form>
     <pre meld:id="profiledata">
     </pre>
   </body>
