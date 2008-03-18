@@ -1,21 +1,23 @@
 repoze.profile (unreleased)
 
-  Bump ez_setup.py version.
+  - Incorporated a patch from Alec Flett <alecf@metaweb.com> to uses
+    'cProfile', if available, rather than pure Python 'profile'.
+
+  - Bump ez_setup.py version.
 
 repoze.profile 0.3 (2008-02-20)
 
-  Compatibility with Python 2.5.
+  - Added compatibility with Python 2.5.
 
-  Depend explicitly on ElementTree 1.2.6 (meld needs it but meld isn't
-  a setuptools package).
+  - Made setup.py epend explicitly on ElementTree 1.2.6: meld needs it
+    but meld isn't a setuptools package.
 
 repoze.profile 0.2 (2008-02-20)
 
-  Add a browser UI.
+  - Added a browser UI.
 
-  Add a knob to control discard at shutdown.
+  - Added a knob to control discard at shutdown.
 
 repoze.profile 0.1 (2008-02-08)
 
-  Initial release.
-
+  - Initial release.

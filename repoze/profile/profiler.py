@@ -3,7 +3,11 @@
 o Insprired by the paste.debug.profile version, which profiles single requests.
 """
 import os
-import profile
+try:
+    import cProfile as profile
+except ImportError:
+    import profile
+    
 import pstats
 import sys
 import StringIO
