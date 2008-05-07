@@ -1,4 +1,7 @@
-repoze.profile (unreleased)
+repoze.profile 0.4 (2008-05-07)
+
+  - Remove dependency-link to http://dist.repoze.org to prevent
+    easy_install from adding that to its search path.
 
   - Incorporated a patch from Alec Flett <alecf@metaweb.com> to uses
     'cProfile', if available, rather than pure Python 'profile'.

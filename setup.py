@@ -12,7 +12,7 @@
 #
 ##############################################################################
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 import os
 
@@ -40,7 +40,6 @@ setup(name='repoze.profile',
       keywords='web application server wsgi zope',
       author="Agendaless Consulting",
       author_email="repoze-dev@lists.repoze.org",
-      dependency_links=['http://dist.repoze.org'],
       url="http://www.repoze.org",
       license="BSD-derived (http://www.repoze.org/LICENSE.txt)",
       packages=find_packages(),
