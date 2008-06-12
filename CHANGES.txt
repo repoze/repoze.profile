@@ -1,3 +1,7 @@
+repoze.profile 0.5 (2008-06-11)
+
+  - Initial PyPI release.
+
 repoze.profile 0.4 (2008-05-07)
 
   - Remove dependency-link to http://dist.repoze.org to prevent

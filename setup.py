@@ -12,7 +12,7 @@
 #
 ##############################################################################
 
-__version__ = '0.4'
+__version__ = '0.5'
 
 import os
 
@@ -23,13 +23,14 @@ from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
+CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 setup(name='repoze.profile',
       version=__version__,
       description='Aggregate profiling for WSGI requests',
-      long_description=README,
+      long_description=README + '\n\n' + CHANGES,
       classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Topic :: Internet :: WWW/HTTP",
