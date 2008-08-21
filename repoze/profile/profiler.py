@@ -34,7 +34,7 @@ class AccumulatingProfileMiddleware(object):
         self.app = app
         self.profiler = profile.Profile()
         self.log_filename = log_filename
-        self.first_request = discard_first_request
+        self.first_request = not discard_first_request
         self.lock = threading.Lock()
         self.flush_at_shutdown = flush_at_shutdown
         self.path = path
@@ -55,6 +55,7 @@ class AccumulatingProfileMiddleware(object):
 
         if clear and log_exists:
             os.remove(self.log_filename)
+            self.profiler = profile.Profile()
             log_exists = False
 
         if log_exists:
