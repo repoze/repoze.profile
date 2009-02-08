@@ -1,37 +1,54 @@
+Next release (2009-02-08)
+-------------------------
+
+- ``discard_first_request = true`` did not work!
+
+- Added tests for ``discard_first_request`` and ``flush_at_shutdown``.
+
+- Converted CHANGES.txt to ReST.
+
+- Bump ez_setup.py version.
+
 repoze.profile 0.6 (2008-08-21)
+-------------------------------
 
-  - ``discard_first_request = false`` did not work.
+- ``discard_first_request = false`` did not work.
 
-  - Clearing the profile data from the user interface did not properly
-    discard profiler state.
+- Clearing the profile data from the user interface did not properly
+   discard profiler state.
 
 repoze.profile 0.5 (2008-06-11)
+-------------------------------
 
-  - Initial PyPI release.
+- Initial PyPI release.
 
 repoze.profile 0.4 (2008-05-07)
+-------------------------------
 
-  - Remove dependency-link to http://dist.repoze.org to prevent
-    easy_install from adding that to its search path.
+- Remove dependency-link to http://dist.repoze.org to prevent
+  easy_install from adding that to its search path.
 
-  - Incorporated a patch from Alec Flett <alecf@metaweb.com> to uses
-    'cProfile', if available, rather than pure Python 'profile'.
+- Incorporated a patch from Alec Flett <alecf@metaweb.com> to uses
+  ``cProfile``, if available, rather than pure Python ``profile``.
 
-  - Bump ez_setup.py version.
+- Bump ez_setup.py version.
 
 repoze.profile 0.3 (2008-02-20)
+-------------------------------
 
-  - Added compatibility with Python 2.5.
+- Added compatibility with Python 2.5.
 
-  - Made setup.py epend explicitly on ElementTree 1.2.6: meld needs it
-    but meld isn't a setuptools package.
+- Made setup.py depend explicitly on ElementTree 1.2.6: meld needs it
+  but meld isn't a setuptools package.
 
 repoze.profile 0.2 (2008-02-20)
+-------------------------------
 
-  - Added a browser UI.
+- Added a browser UI.
 
-  - Added a knob to control discard at shutdown.
+- Added a knob to control discard at shutdown.
 
 repoze.profile 0.1 (2008-02-08)
+-------------------------------
 
-  - Initial release.
+- Initial release.

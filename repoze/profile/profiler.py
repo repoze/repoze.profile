@@ -31,10 +31,12 @@ class AccumulatingProfileMiddleware(object):
                  flush_at_shutdown = True,
                  path='/__profile__',
                 ):
+        self.exists = os.path.exists # for __del__
+        self.remove = os.remove # for __del__
         self.app = app
         self.profiler = profile.Profile()
         self.log_filename = log_filename
-        self.first_request = not discard_first_request
+        self.first_request = discard_first_request
         self.lock = threading.Lock()
         self.flush_at_shutdown = flush_at_shutdown
         self.path = path
@@ -106,8 +108,8 @@ class AccumulatingProfileMiddleware(object):
         return root.write_xhtmlstring()
 
     def __del__(self):
-        if self.flush_at_shutdown and os.path.exists(self.log_filename):
-            os.remove(self.log_filename)
+        if self.flush_at_shutdown and self.exists(self.log_filename):
+            self.remove(self.log_filename)
 
     def __call__(self, environ, start_response):
         catch_response = []
@@ -150,10 +152,19 @@ class AccumulatingProfileMiddleware(object):
         finally:
             self.lock.release()
 
+def boolean(s):
+    if s in (True, 1):
+        return True
+    s = s.lower()
+    if ( s.startswith('t') or s.startswith('y') or
+         s.startswith('1') or s.startswith('on') ):
+        return True
+    return False
+
 def make_profile_middleware(app,
                             global_conf,
                             log_filename=DEFAULT_PROFILE_LOG,
-                            discard_first_request=True,
+                            discard_first_request='true',
                             path='/__profile__',
                             flush_at_shutdown='true',
                            ):
@@ -170,15 +181,13 @@ def make_profile_middleware(app,
 
     o Ergo, NEVER USE THIS MIDDLEWARE IN PRODUCTION.
     """
-    if flush_at_shutdown.lower().startswith('t'):
-        flush_at_shutdown = 1
-    else:
-        flush_at_shutdown = 0
+    flush_at_shutdown = boolean(flush_at_shutdown)
+    discard_first_request = boolean(discard_first_request)
         
     return AccumulatingProfileMiddleware(
                 app,
                 log_filename=log_filename,
                 discard_first_request=discard_first_request,
-                flush_at_shutdown=int(flush_at_shutdown),
+                flush_at_shutdown=flush_at_shutdown,
                 path=path,
                )

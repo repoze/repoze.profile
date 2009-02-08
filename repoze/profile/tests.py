@@ -101,6 +101,122 @@ class TestProfileMiddleware(unittest.TestCase):
         self.assertEqual(headerses[0][0], ('content-type', 'text/html'))
         self.assertEqual(headerses[0][1], ('content-length', str(len(html))))
 
+    def test_call_discard_first_request(self):
+        from StringIO import StringIO
+        fields = [
+            ('full_dirs', '1'),
+            ('sort', 'cumulative'),
+            ('limit', '500'),
+            ('mode', 'callers'),
+            ]
+        content_type, body = encode_multipart_formdata(fields)
+        environ = self._makeEnviron(
+            {'wsgi.input':StringIO(body),
+            'CONTENT_TYPE':content_type,
+             'CONTENT_LENGTH':len(body),
+             })
+        import tempfile
+        log_filename = tempfile.mktemp()
+        middleware = self._makeOne(app, log_filename=log_filename)
+        self.failUnless(middleware.first_request)
+        statuses = []
+        headerses = []
+        def start_response(status, headers, exc_info=None):
+            statuses.append(status)
+            headerses.append(headers)
+        iterable = middleware(environ, start_response)
+        self.assertEqual(statuses[0], '200 OK')
+        self.failIf(middleware.first_request)
+        import os
+        self.failIf(os.path.exists(log_filename))
+        another = middleware(environ, start_response)
+        self.failUnless(os.path.exists(log_filename))
+        os.remove(log_filename)
+
+    def test_call_keep_first_request(self):
+        from StringIO import StringIO
+        fields = [
+            ('full_dirs', '1'),
+            ('sort', 'cumulative'),
+            ('limit', '500'),
+            ('mode', 'callers'),
+            ]
+        content_type, body = encode_multipart_formdata(fields)
+        environ = self._makeEnviron(
+            {'wsgi.input':StringIO(body),
+            'CONTENT_TYPE':content_type,
+             'CONTENT_LENGTH':len(body),
+             })
+        import tempfile
+        log_filename = tempfile.mktemp()
+        middleware = self._makeOne(app, discard_first_request=False,
+                                   log_filename=log_filename)
+        self.failIf(middleware.first_request)
+        statuses = []
+        headerses = []
+        def start_response(status, headers, exc_info=None):
+            statuses.append(status)
+            headerses.append(headers)
+        iterable = middleware(environ, start_response)
+        self.assertEqual(statuses[0], '200 OK')
+        self.failIf(middleware.first_request)
+        import os
+        self.failUnless(os.path.exists(log_filename))
+        os.remove(log_filename)
+
+    def test_flush_at_shutdown(self):
+        from StringIO import StringIO
+        fields = [
+            ('full_dirs', '1'),
+            ('sort', 'cumulative'),
+            ('limit', '500'),
+            ('mode', 'callers'),
+            ]
+        content_type, body = encode_multipart_formdata(fields)
+        environ = self._makeEnviron(
+            {'wsgi.input':StringIO(body),
+            'CONTENT_TYPE':content_type,
+             'CONTENT_LENGTH':len(body),
+             })
+        import tempfile
+        log_filename = tempfile.mktemp()
+        middleware = self._makeOne(app, flush_at_shutdown=True,
+                                   log_filename=log_filename)
+        f = open(log_filename, 'w')
+        f.write('')
+        del middleware
+        import os
+        self.failIf(os.path.exists(log_filename))
+        
+    def test_keep_at_shutdown(self):
+        from StringIO import StringIO
+        fields = [
+            ('full_dirs', '1'),
+            ('sort', 'cumulative'),
+            ('limit', '500'),
+            ('mode', 'callers'),
+            ]
+        content_type, body = encode_multipart_formdata(fields)
+        environ = self._makeEnviron(
+            {'wsgi.input':StringIO(body),
+            'CONTENT_TYPE':content_type,
+             'CONTENT_LENGTH':len(body),
+             })
+        import tempfile
+        log_filename = tempfile.mktemp()
+        middleware = self._makeOne(app, flush_at_shutdown=False,
+                                   log_filename=log_filename)
+        f = open(log_filename, 'w')
+        f.write('')
+        del middleware
+        import os
+        self.failUnless(os.path.exists(log_filename))
+        os.remove(log_filename)
+        
+def app(environ, start_response, exc_info=None):
+    start_response('200 OK', (), exc_info)
+    return ['']
+
 def encode_multipart_formdata(fields):
     BOUNDARY = '----------ThIs_Is_tHe_bouNdaRY_$'
     CRLF = '\r\n'

@@ -39,8 +39,7 @@ The configuration options are as follows::
 
  - If ``flush_at_shutdown`` is true (the default), profiling data will
    be deleted when the middleware instance disappears (via its
-   __del__).  If it's false, profiling data will persist across
-   application restarts.
+   __del__).  If it's false, profiling data will not be deleted.
 
  - ``path`` is the URL path to the profiler UI.  It defaults to
    ``/__profile__``.
