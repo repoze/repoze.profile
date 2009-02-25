@@ -1,4 +1,4 @@
-repoze.profile 0.8 (unreleased)
+repoze.profile 0.8 (2009-02-25)
 -------------------------------
 
 - Added optional support for directly writing out the profiling data in the
