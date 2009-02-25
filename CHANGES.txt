@@ -1,6 +1,9 @@
 repoze.profile 0.8 (unreleased)
 -------------------------------
 
+- Added optional support for directly writing out the profiling data in the
+  KCacheGrind format.
+
 - Avoid a dependency on `elementtree` when used with Python 2.5 and later.
   In those Python versions we used the built-in xml.etree support.
 

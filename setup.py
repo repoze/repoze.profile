@@ -29,6 +29,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 REQUIREMENTS = [
      'meld3',
      'Paste',
+     'pyprof2calltree',
      ]
 
 # elementtree is only required before Python 2.5.

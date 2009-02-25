@@ -7,11 +7,13 @@ try:
     import cProfile as profile
 except ImportError:
     import profile
-    
+
 import pstats
 import sys
 import StringIO
 import threading
+
+import pyprof2calltree
 
 from paste.request import parse_formvars
 from paste.request import construct_url
@@ -27,6 +29,7 @@ class AccumulatingProfileMiddleware(object):
     def __init__(self, app,
                  global_conf=None,
                  log_filename=DEFAULT_PROFILE_LOG,
+                 cachegrind_filename=None,
                  discard_first_request=True,
                  flush_at_shutdown = True,
                  path='/__profile__',
@@ -36,6 +39,7 @@ class AccumulatingProfileMiddleware(object):
         self.app = app
         self.profiler = profile.Profile()
         self.log_filename = log_filename
+        self.cachegrind_filename = cachegrind_filename
         self.first_request = discard_first_request
         self.lock = threading.Lock()
         self.flush_at_shutdown = flush_at_shutdown
@@ -146,6 +150,16 @@ class AccumulatingProfileMiddleware(object):
                 self.first_request = False
             else:
                 self.profiler.dump_stats(self.log_filename)
+                if self.cachegrind_filename is not None:
+                    stats = pstats.Stats(self.profiler)
+                    conv = pyprof2calltree.CalltreeConverter(stats)
+                    grind = None
+                    try:
+                        grind = file(self.cachegrind_filename, 'wb')
+                        conv.output(grind)
+                    finally:
+                        if grind is not None:
+                            grind.close()
 
             body = ''.join(body)
             return [body]
@@ -164,6 +178,7 @@ def boolean(s):
 def make_profile_middleware(app,
                             global_conf,
                             log_filename=DEFAULT_PROFILE_LOG,
+                            cachegrind_filename=None,
                             discard_first_request='true',
                             path='/__profile__',
                             flush_at_shutdown='true',
@@ -187,6 +202,7 @@ def make_profile_middleware(app,
     return AccumulatingProfileMiddleware(
                 app,
                 log_filename=log_filename,
+                cachegrind_filename=cachegrind_filename,
                 discard_first_request=discard_first_request,
                 flush_at_shutdown=flush_at_shutdown,
                 path=path,

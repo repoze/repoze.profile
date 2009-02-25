@@ -21,6 +21,7 @@ Wire up the middleware in your application::
  middleware = AccumulatingProfileMiddleware(
                 app,
                 log_filename='/foo/bar.log',
+                cachegrind_filename='/foo/cachegrind.out.bar',
                 discard_first_request=True,
                 flush_at_shutdown=True,
                 path='/__profile__'
@@ -30,6 +31,10 @@ The configuration options are as follows::
 
  - ``log_filename`` is the name of the file to which the accumulated
    profiler statistics are logged.
+
+ - ``cachegrind_filename`` is the optional name of the file to which
+   the accumulated profiler statistics are logged in the KCachegrind
+   format.
 
  - If ``discard_first_request`` to true (the default), then the
    middleware discards the statistics for the first request:  the
@@ -57,6 +62,7 @@ example::
  [filter:profile]
  use = egg:repoze.profile#profile
  log_filename = myapp.profile
+ cachegrind_filename = cachegrind.out.myapp
  discard_first_request = true
  path = /__profile__
  flush_at_shutdown = true
