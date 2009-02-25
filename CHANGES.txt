@@ -1,3 +1,9 @@
+repoze.profile 0.8 (unreleased)
+-------------------------------
+
+- Avoid a dependency on `elementtree` when used with Python 2.5 and later.
+  In those Python versions we used the built-in xml.etree support.
+
 repoze.profile 0.7 (2009-02-08)
 -------------------------------
 

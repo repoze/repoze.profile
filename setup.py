@@ -15,6 +15,7 @@
 __version__ = '0.7'
 
 import os
+import sys
 
 from ez_setup import use_setuptools
 use_setuptools()
@@ -24,6 +25,17 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
+
+REQUIREMENTS = [
+     'meld3',
+     'Paste',
+     ]
+
+# elementtree is only required before Python 2.5.
+# The dependency is also not caused by ourselves but by meld3, which
+# fails to declare it.
+if sys.version_info[:3] < (2,5,0):
+    REQUIREMENTS.append('elementtree >= 1.2.6, < 1.2.7')
 
 setup(name='repoze.profile',
       version=__version__,
@@ -47,16 +59,8 @@ setup(name='repoze.profile',
       include_package_data=True,
       namespace_packages=['repoze'],
       zip_safe=False,
-      tests_require = [
-                 'meld3',
-                 'Paste',
-                 'elementtree >= 1.2.6, < 1.2.7', # meld3 not setuptools pkg
-                 ],
-      install_requires=[
-                 'meld3',
-                 'Paste',
-                 'elementtree >= 1.2.6, < 1.2.7', # meld3 not setuptools pkg
-                 ],
+      tests_require=REQUIREMENTS,
+      install_requires=REQUIREMENTS,
       test_suite="repoze.profile.tests",
       entry_points = """\
       [paste.filter_app_factory]
