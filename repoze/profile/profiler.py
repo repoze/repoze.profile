@@ -13,7 +13,12 @@ import sys
 import StringIO
 import threading
 
-import pyprof2calltree
+HAS_PP2CT = True
+try:
+    import pyprof2calltree
+except ImportError:
+    HAS_PP2CT = False
+
 
 from paste.request import parse_formvars
 from paste.request import construct_url
@@ -150,7 +155,7 @@ class AccumulatingProfileMiddleware(object):
                 self.first_request = False
             else:
                 self.profiler.dump_stats(self.log_filename)
-                if self.cachegrind_filename is not None:
+                if HAS_PP2CT and self.cachegrind_filename is not None:
                     stats = pstats.Stats(self.profiler)
                     conv = pyprof2calltree.CalltreeConverter(stats)
                     grind = None

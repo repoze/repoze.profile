@@ -1,6 +1,8 @@
 repoze.profile 0.9 (unreleased)
 -------------------------------
 
+- Made the `pyprof2calltree` dependency conditional on the Python version.
+  This package depends on Python >= 2.5.
 
 repoze.profile 0.8 (2009-02-25)
 -------------------------------

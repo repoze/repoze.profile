@@ -29,14 +29,17 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 REQUIREMENTS = [
      'meld3',
      'Paste',
-     'pyprof2calltree',
      ]
 
-# elementtree is only required before Python 2.5.
-# The dependency is also not caused by ourselves but by meld3, which
-# fails to declare it.
 if sys.version_info[:3] < (2,5,0):
+    # elementtree is only required before Python 2.5.
+    # The dependency is also not caused by ourselves but by meld3, which
+    # fails to declare it.
     REQUIREMENTS.append('elementtree >= 1.2.6, < 1.2.7')
+else:
+    # pyprof2calltree on the other hand only works with Python 2.5 and later
+    REQUIREMENTS.append('pyprof2calltree')
+
 
 setup(name='repoze.profile',
       version=__version__,
