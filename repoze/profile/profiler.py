@@ -3,10 +3,10 @@
 o Insprired by the paste.debug.profile version, which profiles single requests.
 """
 import os
-try:
-    import cProfile as profile
-except ImportError:
-    import profile
+try: # pragma: no cover
+    import cProfile as profile # pragma: no cover
+except ImportError: # pragma: no cover
+    import profile # pragma: no cover
 
 import pstats
 import sys
@@ -14,10 +14,10 @@ import StringIO
 import threading
 
 HAS_PP2CT = True
-try:
-    import pyprof2calltree
-except ImportError:
-    HAS_PP2CT = False
+try: # pragma: no cover
+    import pyprof2calltree # pragma: no cover
+except ImportError: # pragma: no cover
+    HAS_PP2CT = False # pragma: no cover
 
 
 from paste.request import parse_formvars
@@ -30,6 +30,7 @@ _HERE = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_PROFILE_LOG = 'wsgi.prof'
 
 class AccumulatingProfileMiddleware(object):
+    Stats = pstats.Stats
 
     def __init__(self, app,
                  global_conf=None,
@@ -52,7 +53,7 @@ class AccumulatingProfileMiddleware(object):
         self.template = os.path.join(_HERE, 'profiler.html')
         self.meldroot = meld3.parse_xml(self.template)
 
-    def index(self, environ):
+    def index(self, environ, output=None): # output=None D/I for testing
         root = self.meldroot.clone()
         querydata = parse_formvars(environ)
         full_dirs = int(querydata.get('full_dirs', 0))
@@ -60,7 +61,8 @@ class AccumulatingProfileMiddleware(object):
         clear = querydata.get('clear', None)
         limit = int(querydata.get('limit', 100))
         mode = querydata.get('mode', 'stats')
-        output = StringIO.StringIO()
+        if output is None:
+            output = StringIO.StringIO()
         url = construct_url(environ)
         log_exists = os.path.exists(self.log_filename)
 
@@ -70,7 +72,7 @@ class AccumulatingProfileMiddleware(object):
             log_exists = False
 
         if log_exists:
-            stats = pstats.Stats(self.log_filename)
+            stats = self.Stats(self.log_filename) # D/I
             if not full_dirs:
                 stats.strip_dirs()
             stats.sort_stats(sort)
@@ -121,34 +123,25 @@ class AccumulatingProfileMiddleware(object):
             self.remove(self.log_filename)
 
     def __call__(self, environ, start_response):
-        catch_response = []
-        body = []
-
         path_info = environ.get('PATH_INFO')
 
         if path_info == self.path:
             # we're being asked to render the profile view
-            body = self.index(environ)
+            text = self.index(environ)
             start_response('200 OK', [('content-type', 'text/html'),
-                                      ('content-length', str(len(body)))])
-            return [body]
-
-        def replace_start_response(status, headers, exc_info=None):
-            catch_response.extend([status, headers])
-            start_response(status, headers, exc_info)
-            return body.append
-
-        def run_app():
-            app_iter = self.app(environ, replace_start_response)
-            try:
-                body.extend(app_iter)
-            finally:
-                if hasattr(app_iter, 'close'):
-                    app_iter.close()
+                                      ('content-length', str(len(text)))])
+            return [text]
 
         self.lock.acquire()
         try:
-            self.profiler.runctx('run_app()', globals(), locals())
+            _locals = {
+                'self':self,
+                'environ':environ,
+                'start_response':start_response,
+                }
+            self.profiler.runctx(
+                'app_iter = self.app(environ, start_response)', globals(),
+                _locals)
 
             if self.first_request: # discard to avoid timing warm-up
                 self.profiler = profile.Profile()
@@ -165,15 +158,16 @@ class AccumulatingProfileMiddleware(object):
                     finally:
                         if grind is not None:
                             grind.close()
-
-            body = ''.join(body)
-            return [body]
+            app_iter = _locals['app_iter']
+            if hasattr(app_iter, 'close'):
+                app_iter.close()
+            return app_iter
         finally:
             self.lock.release()
 
 def boolean(s):
-    if s in (True, 1):
-        return True
+    if s == True:
+        return True # pragma: no cover
     s = s.lower()
     if ( s.startswith('t') or s.startswith('y') or
          s.startswith('1') or s.startswith('on') ):

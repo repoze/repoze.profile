@@ -5,6 +5,11 @@ Changelog
 Next release
 ------------
 
+- 100% test coverage.
+
+- Get rid of spurious measurements of testing scaffolding in profile
+  output (show no calls that are inside r.profile itself).
+
 1.0 (2009-06-04)
 ----------------
 

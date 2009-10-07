@@ -72,6 +72,77 @@ class TestProfileMiddleware(unittest.TestCase):
         import os
         self.failIf(os.path.exists(f))
 
+    def test_index_get_withdata(self):
+        from StringIO import StringIO
+        environ = self._makeEnviron({
+             'REQUEST_METHOD':'GET',
+             'wsgi.input':'',
+             })
+        middleware = self._makeOne(None)
+        output = StringIO('hello!')
+        html = middleware.index(environ, output)
+        self.failUnless('Profiling information is generated' in html)
+
+    def test_index_post_withdata_full_dirs(self):
+        from StringIO import StringIO
+        fields = [
+            ('full_dirs', '1'),
+            ('sort', 'cumulative'),
+            ('limit', '500'),
+            ('mode', 'callers'),
+            ]
+        content_type, body = encode_multipart_formdata(fields)
+        environ = self._makeEnviron(
+            {'wsgi.input':StringIO(body),
+            'CONTENT_TYPE':content_type,
+             'CONTENT_LENGTH':len(body),
+             })
+
+        middleware = self._makeOne(None)
+        environ['PATH_INFO'] = middleware.path
+        middleware = self._makeOne(None)
+        output = StringIO('hello!')
+        html = middleware.index(environ, output)
+        self.failUnless('Profiling information is generated' in html)
+
+    def test_index_withstats(self):
+        import os
+        import tempfile
+        from StringIO import StringIO
+        fields = [
+            ('sort', 'cumulative'),
+            ('limit', '500'),
+            ('mode', 'stats'),
+            ]
+        content_type, body = encode_multipart_formdata(fields)
+        environ = self._makeEnviron(
+            {'wsgi.input':StringIO(body),
+            'CONTENT_TYPE':content_type,
+             'CONTENT_LENGTH':len(body),
+             })
+
+        middleware = self._makeOne(None)
+        stats = DummyStats()
+        middleware.Stats = stats
+        f = tempfile.mktemp()
+        open(f, 'w').write('x')
+        middleware.log_filename = f
+        environ['PATH_INFO'] = middleware.path
+        html = middleware.index(environ)
+        self.assertEqual(stats.stripped, True)
+        self.failIfEqual(stats.stream, True)
+        self.assertEqual(stats.printlimit, 500)
+        self.assertEqual(stats.sortspec, 'cumulative')
+        os.remove(f)
+
+    def test_app_iter_is_closed(self):
+        middleware = self._makeOne(app)
+        def start_response(status, headers, exc_info=None):
+            pass
+        environ = {}
+        iterable = middleware(environ, start_response)
+        self.assertEqual(iterable.closed, True)
+
     def test_call_withpath(self):
         from StringIO import StringIO
         fields = [
@@ -164,6 +235,41 @@ class TestProfileMiddleware(unittest.TestCase):
         self.failUnless(os.path.exists(log_filename))
         os.remove(log_filename)
 
+    def test_call_with_cachegrind(self):
+        from StringIO import StringIO
+        fields = [
+            ('full_dirs', '1'),
+            ('sort', 'cumulative'),
+            ('limit', '500'),
+            ('mode', 'callers'),
+            ]
+        content_type, body = encode_multipart_formdata(fields)
+        environ = self._makeEnviron(
+            {'wsgi.input':StringIO(body),
+            'CONTENT_TYPE':content_type,
+             'CONTENT_LENGTH':len(body),
+             })
+        import tempfile
+        log_filename = tempfile.mktemp()
+        cachegrind_filename = tempfile.mktemp()
+        middleware = self._makeOne(app, discard_first_request=False,
+                                   log_filename=log_filename,
+                                   cachegrind_filename=cachegrind_filename)
+        self.failIf(middleware.first_request)
+        statuses = []
+        headerses = []
+        def start_response(status, headers, exc_info=None):
+            statuses.append(status)
+            headerses.append(headers)
+        iterable = middleware(environ, start_response)
+        self.assertEqual(statuses[0], '200 OK')
+        self.failIf(middleware.first_request)
+        import os
+        self.failUnless(os.path.exists(log_filename))
+        os.remove(log_filename)
+        self.failUnless(os.path.exists(cachegrind_filename))
+        os.remove(cachegrind_filename)
+
     def test_flush_at_shutdown(self):
         from StringIO import StringIO
         fields = [
@@ -212,10 +318,34 @@ class TestProfileMiddleware(unittest.TestCase):
         import os
         self.failUnless(os.path.exists(log_filename))
         os.remove(log_filename)
+
+class TestMakeProfileMiddleware(unittest.TestCase):
+    def _callFUT(self, *arg, **kw):
+        from repoze.profile.profiler import make_profile_middleware
+        return make_profile_middleware(*arg, **kw)
+
+    def test_it(self):
+        mw = self._callFUT(app,
+                           {},
+                           log_filename='/tmp/log',
+                           cachegrind_filename='/tmp/cachegrind',
+                           discard_first_request='true',
+                           flush_at_shutdown='false',
+                           path='/__profile__')
+        self.assertEqual(mw.app, app)
+        self.assertEqual(mw.log_filename, '/tmp/log')
+        self.assertEqual(mw.cachegrind_filename, '/tmp/cachegrind')
+        self.assertEqual(mw.first_request, True)
+        self.assertEqual(mw.flush_at_shutdown, False)
+        self.assertEqual(mw.path, '/__profile__')
         
 def app(environ, start_response, exc_info=None):
     start_response('200 OK', (), exc_info)
-    return ['']
+    return closeable([''])
+
+class closeable(list):
+    def close(self):
+        self.closed = True
 
 def encode_multipart_formdata(fields):
     BOUNDARY = '----------ThIs_Is_tHe_bouNdaRY_$'
@@ -231,4 +361,23 @@ def encode_multipart_formdata(fields):
     body = CRLF.join(L)
     content_type = 'multipart/form-data; boundary=%s' % BOUNDARY
     return content_type, body
+
+class DummyStats:
+    stripped = False
+    stream = True
+    log_filename = None
+    def __call__(self, log_filename):
+        self.log_filename = log_filename
+        return self
+
+    def strip_dirs(self):
+        self.stripped = True
+
+    def print_stats(self, limit):
+        self.printlimit = limit
+
+    def sort_stats(self, sort):
+        self.sortspec = sort
+        
+
 
