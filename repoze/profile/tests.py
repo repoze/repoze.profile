@@ -46,7 +46,9 @@ class TestProfileMiddleware(unittest.TestCase):
         self.failIf(html.find('There is not yet any profiling data') == -1)
 
     def test_index_clear(self):
+        import os
         from StringIO import StringIO
+        import tempfile
         fields = [
             ('full_dirs', '1'),
             ('sort', 'cumulative'),
@@ -63,13 +65,11 @@ class TestProfileMiddleware(unittest.TestCase):
              })
 
         middleware = self._makeOne(None)
-        import tempfile
         f = tempfile.mktemp()
         open(f, 'w').write('x')
         middleware.log_filename = f
         html = middleware.index(environ)
         self.failIf(html.find('There is not yet any profiling data') == -1)
-        import os
         self.failIf(os.path.exists(f))
 
     def test_index_get_withdata(self):
@@ -135,13 +135,13 @@ class TestProfileMiddleware(unittest.TestCase):
         self.assertEqual(stats.sortspec, 'cumulative')
         os.remove(f)
 
-    def test_app_iter_is_closed(self):
+    def test_app_iter_is_not_closed(self):
         middleware = self._makeOne(app)
         def start_response(status, headers, exc_info=None):
             pass
         environ = {}
         iterable = middleware(environ, start_response)
-        self.assertEqual(iterable.closed, True)
+        self.assertEqual(iterable.closed, False)
 
     def test_call_withpath(self):
         from StringIO import StringIO
@@ -173,7 +173,9 @@ class TestProfileMiddleware(unittest.TestCase):
         self.assertEqual(headerses[0][1], ('content-length', str(len(html))))
 
     def test_call_discard_first_request(self):
+        import os
         from StringIO import StringIO
+        import tempfile
         fields = [
             ('full_dirs', '1'),
             ('sort', 'cumulative'),
@@ -186,7 +188,6 @@ class TestProfileMiddleware(unittest.TestCase):
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
-        import tempfile
         log_filename = tempfile.mktemp()
         middleware = self._makeOne(app, log_filename=log_filename)
         self.failUnless(middleware.first_request)
@@ -198,14 +199,15 @@ class TestProfileMiddleware(unittest.TestCase):
         iterable = middleware(environ, start_response)
         self.assertEqual(statuses[0], '200 OK')
         self.failIf(middleware.first_request)
-        import os
         self.failIf(os.path.exists(log_filename))
         another = middleware(environ, start_response)
         self.failUnless(os.path.exists(log_filename))
         os.remove(log_filename)
 
     def test_call_keep_first_request(self):
+        import os
         from StringIO import StringIO
+        import tempfile
         fields = [
             ('full_dirs', '1'),
             ('sort', 'cumulative'),
@@ -218,7 +220,6 @@ class TestProfileMiddleware(unittest.TestCase):
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
-        import tempfile
         log_filename = tempfile.mktemp()
         middleware = self._makeOne(app, discard_first_request=False,
                                    log_filename=log_filename)
@@ -231,12 +232,16 @@ class TestProfileMiddleware(unittest.TestCase):
         iterable = middleware(environ, start_response)
         self.assertEqual(statuses[0], '200 OK')
         self.failIf(middleware.first_request)
-        import os
         self.failUnless(os.path.exists(log_filename))
         os.remove(log_filename)
 
     def test_call_with_cachegrind(self):
+        from repoze.profile.profiler import HAS_PP2CT
+        if not HAS_PP2CT:
+            return
+        import os
         from StringIO import StringIO
+        import tempfile
         fields = [
             ('full_dirs', '1'),
             ('sort', 'cumulative'),
@@ -249,7 +254,6 @@ class TestProfileMiddleware(unittest.TestCase):
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
-        import tempfile
         log_filename = tempfile.mktemp()
         cachegrind_filename = tempfile.mktemp()
         middleware = self._makeOne(app, discard_first_request=False,
@@ -264,14 +268,15 @@ class TestProfileMiddleware(unittest.TestCase):
         iterable = middleware(environ, start_response)
         self.assertEqual(statuses[0], '200 OK')
         self.failIf(middleware.first_request)
-        import os
         self.failUnless(os.path.exists(log_filename))
         os.remove(log_filename)
         self.failUnless(os.path.exists(cachegrind_filename))
         os.remove(cachegrind_filename)
 
     def test_flush_at_shutdown(self):
+        import os
         from StringIO import StringIO
+        import tempfile
         fields = [
             ('full_dirs', '1'),
             ('sort', 'cumulative'),
@@ -284,18 +289,18 @@ class TestProfileMiddleware(unittest.TestCase):
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
-        import tempfile
         log_filename = tempfile.mktemp()
         middleware = self._makeOne(app, flush_at_shutdown=True,
                                    log_filename=log_filename)
         f = open(log_filename, 'w')
         f.write('')
         del middleware
-        import os
         self.failIf(os.path.exists(log_filename))
         
     def test_keep_at_shutdown(self):
+        import os
         from StringIO import StringIO
+        import tempfile
         fields = [
             ('full_dirs', '1'),
             ('sort', 'cumulative'),
@@ -308,14 +313,12 @@ class TestProfileMiddleware(unittest.TestCase):
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
-        import tempfile
         log_filename = tempfile.mktemp()
         middleware = self._makeOne(app, flush_at_shutdown=False,
                                    log_filename=log_filename)
         f = open(log_filename, 'w')
         f.write('')
         del middleware
-        import os
         self.failUnless(os.path.exists(log_filename))
         os.remove(log_filename)
 
@@ -344,6 +347,7 @@ def app(environ, start_response, exc_info=None):
     return closeable([''])
 
 class closeable(list):
+    closed = False
     def close(self):
         self.closed = True
 

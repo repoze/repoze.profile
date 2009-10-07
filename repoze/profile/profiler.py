@@ -134,11 +134,7 @@ class AccumulatingProfileMiddleware(object):
 
         self.lock.acquire()
         try:
-            _locals = {
-                'self':self,
-                'environ':environ,
-                'start_response':start_response,
-                }
+            _locals = locals()
             self.profiler.runctx(
                 'app_iter = self.app(environ, start_response)', globals(),
                 _locals)
@@ -158,9 +154,8 @@ class AccumulatingProfileMiddleware(object):
                     finally:
                         if grind is not None:
                             grind.close()
+
             app_iter = _locals['app_iter']
-            if hasattr(app_iter, 'close'):
-                app_iter.close()
             return app_iter
         finally:
             self.lock.release()
