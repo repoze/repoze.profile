@@ -128,7 +128,7 @@ class TestProfileMiddleware(unittest.TestCase):
         open(f, 'w').write('x')
         middleware.log_filename = f
         environ['PATH_INFO'] = middleware.path
-        html = middleware.index(environ)
+        middleware.index(environ)
         self.assertEqual(stats.stripped, True)
         self.failIfEqual(stats.stream, True)
         self.assertEqual(stats.printlimit, 500)
@@ -196,11 +196,11 @@ class TestProfileMiddleware(unittest.TestCase):
         def start_response(status, headers, exc_info=None):
             statuses.append(status)
             headerses.append(headers)
-        iterable = middleware(environ, start_response)
+        middleware(environ, start_response)
         self.assertEqual(statuses[0], '200 OK')
         self.failIf(middleware.first_request)
         self.failIf(os.path.exists(log_filename))
-        another = middleware(environ, start_response)
+        middleware(environ, start_response)
         self.failUnless(os.path.exists(log_filename))
         os.remove(log_filename)
 
@@ -229,7 +229,7 @@ class TestProfileMiddleware(unittest.TestCase):
         def start_response(status, headers, exc_info=None):
             statuses.append(status)
             headerses.append(headers)
-        iterable = middleware(environ, start_response)
+        middleware(environ, start_response)
         self.assertEqual(statuses[0], '200 OK')
         self.failIf(middleware.first_request)
         self.failUnless(os.path.exists(log_filename))
@@ -237,7 +237,7 @@ class TestProfileMiddleware(unittest.TestCase):
 
     def test_call_with_cachegrind(self):
         from repoze.profile.profiler import HAS_PP2CT
-        if not HAS_PP2CT:
+        if not HAS_PP2CT: # pragma: no cover
             return
         import os
         from StringIO import StringIO
@@ -265,7 +265,7 @@ class TestProfileMiddleware(unittest.TestCase):
         def start_response(status, headers, exc_info=None):
             statuses.append(status)
             headerses.append(headers)
-        iterable = middleware(environ, start_response)
+        middleware(environ, start_response)
         self.assertEqual(statuses[0], '200 OK')
         self.failIf(middleware.first_request)
         self.failUnless(os.path.exists(log_filename))
@@ -275,7 +275,6 @@ class TestProfileMiddleware(unittest.TestCase):
 
     def test_flush_at_shutdown(self):
         import os
-        from StringIO import StringIO
         import tempfile
         fields = [
             ('full_dirs', '1'),
@@ -284,11 +283,6 @@ class TestProfileMiddleware(unittest.TestCase):
             ('mode', 'callers'),
             ]
         content_type, body = encode_multipart_formdata(fields)
-        environ = self._makeEnviron(
-            {'wsgi.input':StringIO(body),
-            'CONTENT_TYPE':content_type,
-             'CONTENT_LENGTH':len(body),
-             })
         log_filename = tempfile.mktemp()
         middleware = self._makeOne(app, flush_at_shutdown=True,
                                    log_filename=log_filename)
@@ -299,7 +293,6 @@ class TestProfileMiddleware(unittest.TestCase):
         
     def test_keep_at_shutdown(self):
         import os
-        from StringIO import StringIO
         import tempfile
         fields = [
             ('full_dirs', '1'),
@@ -308,11 +301,6 @@ class TestProfileMiddleware(unittest.TestCase):
             ('mode', 'callers'),
             ]
         content_type, body = encode_multipart_formdata(fields)
-        environ = self._makeEnviron(
-            {'wsgi.input':StringIO(body),
-            'CONTENT_TYPE':content_type,
-             'CONTENT_LENGTH':len(body),
-             })
         log_filename = tempfile.mktemp()
         middleware = self._makeOne(app, flush_at_shutdown=False,
                                    log_filename=log_filename)
@@ -348,8 +336,7 @@ def app(environ, start_response, exc_info=None):
 
 class closeable(list):
     closed = False
-    def close(self):
-        self.closed = True
+    def close(self): self.closed = True
 
 def encode_multipart_formdata(fields):
     BOUNDARY = '----------ThIs_Is_tHe_bouNdaRY_$'
