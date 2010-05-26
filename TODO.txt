@@ -1,0 +1,5 @@
+``repoze.profile`` TODOs
+========================
+
+- [_] Investigate the ``gprof2dot`` graph generator in conjunction with
+      ``graphviz`` (Chris Ewing's idea).
