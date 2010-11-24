@@ -143,6 +143,19 @@ class TestProfileMiddleware(unittest.TestCase):
         iterable = middleware(environ, start_response)
         self.assertEqual(iterable.closed, False)
 
+    def test_app_iter_as_generator_is_consumed(self):
+        _consumed = []
+        def start_response(status, headers, exc_info=None):
+            pass
+        def _app(status, headers, exc_info=None):
+            start_response('200 OK', (), exc_info)
+            yield 'one'
+            _consumed.append('OK')
+        middleware = self._makeOne(_app)
+        environ = {}
+        iterable = middleware(environ, start_response)
+        self.failUnless(_consumed)
+
     def test_call_withpath(self):
         from StringIO import StringIO
         fields = [

@@ -3,6 +3,7 @@
 o Insprired by the paste.debug.profile version, which profiles single requests.
 """
 import os
+from types import GeneratorType
 try: # pragma: no cover
     import cProfile as profile # pragma: no cover
 except ImportError: # pragma: no cover
@@ -156,6 +157,8 @@ class AccumulatingProfileMiddleware(object):
                             grind.close()
 
             app_iter = _locals['app_iter']
+            if type(app_iter) is GeneratorType:
+                app_iter = list(app_iter)
             return app_iter
         finally:
             self.lock.release()

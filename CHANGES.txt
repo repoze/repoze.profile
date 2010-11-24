@@ -2,6 +2,12 @@
 Changelog
 =========
 
+After 1.1 (unreleased)
+----------------------
+
+- Ensure we consume generators returned by the wrapped application.
+  Fixes http://bugs.repoze.org/issue169 
+
 1.1 (2009-10-06)
 ----------------
 
