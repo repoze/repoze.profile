@@ -137,8 +137,10 @@ class AccumulatingProfileMiddleware(object):
         try:
             _locals = locals()
             self.profiler.runctx(
-                'app_iter = self.app(environ, start_response)', globals(),
-                _locals)
+                'app_iter = self.app(environ, start_response); '
+                'app_iter = (type(app_iter) is GeneratorType) '
+                                 'and list(app_iter) or app_iter',
+                globals(), _locals)
 
             if self.first_request: # discard to avoid timing warm-up
                 self.profiler = profile.Profile()
@@ -157,8 +159,6 @@ class AccumulatingProfileMiddleware(object):
                             grind.close()
 
             app_iter = _locals['app_iter']
-            if type(app_iter) is GeneratorType:
-                app_iter = list(app_iter)
             return app_iter
         finally:
             self.lock.release()
