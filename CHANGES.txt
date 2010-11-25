@@ -5,6 +5,8 @@ Changelog
 After 1.1 (unreleased)
 ----------------------
 
+- Converted documentation to Sphinx.
+
 - Ensure we consume generators returned by the wrapped application.
   Fixes http://bugs.repoze.org/issue169 
 
