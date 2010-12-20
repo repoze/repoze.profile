@@ -128,7 +128,11 @@ class AccumulatingProfileMiddleware(object):
 
         if path_info == self.path:
             # we're being asked to render the profile view
-            text = self.index(environ)
+            self.lock.acquire()
+            try:
+                text = self.index(environ)
+            finally:
+                self.lock.release()
             start_response('200 OK', [('content-type', 'text/html'),
                                       ('content-length', str(len(text)))])
             return [text]

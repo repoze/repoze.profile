@@ -2,6 +2,13 @@
 Changelog
 =========
 
+Next release
+------------
+
+- Put a lock around "index" method in order to prevent exceptions when trying
+  to view profile data as it's being generated.  Closes
+  http://bugs.repoze.org/issue168.
+
 1.2 (2010-11-25)
 ----------------
 
