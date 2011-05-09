@@ -60,6 +60,7 @@ class AccumulatingProfileMiddleware(object):
         full_dirs = int(querydata.get('full_dirs', 0))
         sort = querydata.get('sort', 'time')
         clear = querydata.get('clear', None)
+        filename = querydata.get('filename', None)
         limit = int(querydata.get('limit', 100))
         mode = querydata.get('mode', 'stats')
         if output is None:
@@ -84,7 +85,7 @@ class AccumulatingProfileMiddleware(object):
                 orig_stdout = sys.stdout # python 2.4
                 sys.stdout = output
                 print_fn = getattr(stats, 'print_%s' % mode)
-                print_fn(limit)
+                print_fn(filename, limit)
             finally:
                 sys.stdout = orig_stdout
 
@@ -106,10 +107,12 @@ class AccumulatingProfileMiddleware(object):
                 formelements.fillmeldhtmlform(sort=sort,
                                               limit=str(limit),
                                               full_dirs=True,
+                                              filename=filename or '',
                                               mode=mode)
             else:
                 formelements.fillmeldhtmlform(sort=sort,
                                               limit=str(limit),
+                                              filename=filename or '',
                                               mode=mode)
 
             profiledata = root.findmeld('profiledata')
