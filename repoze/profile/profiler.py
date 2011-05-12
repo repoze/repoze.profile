@@ -60,7 +60,7 @@ class AccumulatingProfileMiddleware(object):
         full_dirs = int(querydata.get('full_dirs', 0))
         sort = querydata.get('sort', 'time')
         clear = querydata.get('clear', None)
-        filename = querydata.get('filename', None)
+        filename = querydata.get('filename', '').strip()
         limit = int(querydata.get('limit', 100))
         mode = querydata.get('mode', 'stats')
         if output is None:
@@ -85,7 +85,10 @@ class AccumulatingProfileMiddleware(object):
                 orig_stdout = sys.stdout # python 2.4
                 sys.stdout = output
                 print_fn = getattr(stats, 'print_%s' % mode)
-                print_fn(filename, limit)
+                if filename:
+                    print_fn(filename, limit)
+                else:
+                    print_fn(limit)
             finally:
                 sys.stdout = orig_stdout
 
