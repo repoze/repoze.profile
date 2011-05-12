@@ -1,9 +1,11 @@
-
-Changelog
-=========
+``repoze.profile`` Changelog
+============================
 
 Next release
 ------------
+
+- Added an option to filter profile output by filename.  Thanks to Shish
+  for the patch.
 
 - Put a lock around "index" method in order to prevent exceptions when trying
   to view profile data as it's being generated.  Closes
