@@ -1,8 +1,8 @@
 ``repoze.profile`` Changelog
 ============================
 
-Next release
-------------
+1.3 (2011-09-30)
+----------------
 
 - Added an option to filter profile output by filename.  Thanks to Shish
   for the patch.

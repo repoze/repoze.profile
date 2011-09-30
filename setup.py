@@ -12,8 +12,6 @@
 #
 ##############################################################################
 
-__version__ = '1.2'
-
 import os
 import sys
 
@@ -32,7 +30,7 @@ if not PY3 and not PY25:
     install_requires.append('pyprof2calltree')
 
 setup(name='repoze.profile',
-      version=__version__,
+      version='1.3',
       description='Aggregate profiling for WSGI requests',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[

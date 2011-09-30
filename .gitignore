@@ -10,5 +10,5 @@ build/
 dist/
 .tox/
 nosetests.xml
-repoze.profile/coverage.xml
+repoze/profile/coverage.xml
 env*/
