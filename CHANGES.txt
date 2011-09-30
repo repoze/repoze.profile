@@ -16,7 +16,9 @@ Next release
 - A new ``paste.filter_app_factory`` entry point has been added named
   ``main`` which points to the profiler.  This allows for the simplified
   spelling ``egg:repoze.profile`` in paste.ini files when referring to the
-  profile middleware.
+  profile middleware (instead of the older, more verbose
+  ``egg:repoze.profile#profiler``.  The older alias continues to work as
+  well.
 
 - The new canonical import location for the profiling middleware is
   ``repoze.profile.ProfileMiddleware``.  Older imports continue to work.
