@@ -4,7 +4,6 @@ o Insprired by the paste.debug.profile version, which profiles single requests.
 """
 
 import cgi
-import StringIO
 import os
 import pstats
 import string
@@ -12,18 +11,13 @@ import sys
 import threading
 import types
 
+from repoze.profile.compat import bytes_
+from repoze.profile.compat import parse_qs
+from repoze.profile.compat import profile
+from repoze.profile.compat import StringIO
+
 # True if we are running on Python 3.
 PY3 = sys.version_info[0] == 3
-
-try:
-    from urlparse import parse_qs
-except ImportError: # pragma: no cover
-    from cgi import parse_qs
-
-try: # pragma: no cover
-    import cProfile as profile # pragma: no cover
-except ImportError: # pragma: no cover
-    import profile # pragma: no cover
 
 HAS_PP2CT = True
 try: # pragma: no cover
@@ -79,7 +73,7 @@ class ProfileMiddleware(object):
         limit = int(querydata.get('limit', 100))
         mode = querydata.get('mode', 'stats')
         if output is None:
-            output = StringIO.StringIO()
+            output = StringIO()
         url = request.get_url()
         log_exists = os.path.exists(self.log_filename)
 
@@ -175,7 +169,7 @@ class ProfileMiddleware(object):
             start_response('200 OK', [
                 ('content-type', 'text/html; charset="UTF-8"'),
                 ('content-length', str(len(text)))])
-            return [text]
+            return [bytes_(text)]
 
         self.lock.acquire()
         try:

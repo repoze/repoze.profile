@@ -25,6 +25,10 @@ Next release
   ``repoze.profile.profiler.get_app_iter`` in profiling output; this is the
   function that calls the downstream WSGI application.
 
+- Remove ez_setup.py.
+
+- Python 3.2 compatibility.
+
 1.2 (2010-11-25)
 ----------------
 

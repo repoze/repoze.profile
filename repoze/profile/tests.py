@@ -1,5 +1,9 @@
 import unittest
 
+from repoze.profile.compat import BytesIO
+from repoze.profile.compat import bytes_
+from repoze.profile.compat import text_
+
 class TestProfileMiddleware(unittest.TestCase):
     def _makeOne(self, *arg, **kw):
         from repoze.profile.profiler import ProfileMiddleware
@@ -23,7 +27,6 @@ class TestProfileMiddleware(unittest.TestCase):
         return environ
 
     def test_index_post(self):
-        from StringIO import StringIO
         fields = [
             ('fulldirs', '1'),
             ('sort', 'cumulative'),
@@ -32,7 +35,7 @@ class TestProfileMiddleware(unittest.TestCase):
             ]
         content_type, body = encode_multipart_formdata(fields)
         environ = {
-            'wsgi.input':StringIO(body),
+            'wsgi.input':BytesIO(body),
             'CONTENT_TYPE':content_type,
             'CONTENT_LENGTH':len(body),
             'REQUEST_METHOD':'POST',
@@ -40,7 +43,7 @@ class TestProfileMiddleware(unittest.TestCase):
         middleware = self._makeOne(None)
         request = self._makeRequest(environ)
         html = middleware.index(request)
-        self.failIf(html.find('There is not yet any profiling data') == -1)
+        self.assertFalse(html.find('There is not yet any profiling data') == -1)
 
     def test_index_get(self):
         environ = {
@@ -50,11 +53,10 @@ class TestProfileMiddleware(unittest.TestCase):
         request = self._makeRequest(environ)
         middleware = self._makeOne(None)
         html = middleware.index(request)
-        self.failIf(html.find('There is not yet any profiling data') == -1)
+        self.assertFalse(html.find('There is not yet any profiling data') == -1)
 
     def test_index_clear(self):
         import os
-        from StringIO import StringIO
         import tempfile
         fields = [
             ('fulldirs', '1'),
@@ -65,7 +67,7 @@ class TestProfileMiddleware(unittest.TestCase):
             ]
         content_type, body = encode_multipart_formdata(fields)
         environ = {
-            'wsgi.input':StringIO(body),
+            'wsgi.input':BytesIO(body),
             'CONTENT_TYPE':content_type,
             'CONTENT_LENGTH':len(body),
             'REQUEST_METHOD':'POST',
@@ -73,26 +75,26 @@ class TestProfileMiddleware(unittest.TestCase):
 
         middleware = self._makeOne(None)
         f = tempfile.mktemp()
-        open(f, 'w').write('x')
-        middleware.log_filename = f
+        f = open(f, 'w')
+        f.write('x')
+        f.close()
+        middleware.log_filename = f.name
         request = self._makeRequest(environ)
         html = middleware.index(request)
-        self.failIf(html.find('There is not yet any profiling data') == -1)
-        self.failIf(os.path.exists(f))
+        self.assertFalse(html.find('There is not yet any profiling data') == -1)
+        self.assertFalse(os.path.exists(f.name))
 
     def test_index_get_withdata(self):
-        from StringIO import StringIO
         request = self._makeRequest({
              'REQUEST_METHOD':'GET',
              'wsgi.input':'',
              })
         middleware = self._makeOne(None)
-        output = StringIO('hello!')
+        output = BytesIO(bytes_('hello!'))
         html = middleware.index(request, output)
-        self.failUnless('Profiling information is generated' in html)
+        self.assertTrue('Profiling information is generated' in html)
 
     def test_index_post_withdata_fulldirs(self):
-        from StringIO import StringIO
         fields = [
             ('fulldirs', '1'),
             ('sort', 'cumulative'),
@@ -101,21 +103,20 @@ class TestProfileMiddleware(unittest.TestCase):
             ]
         content_type, body = encode_multipart_formdata(fields)
         request = self._makeRequest(
-            {'wsgi.input':StringIO(body),
+            {'wsgi.input':BytesIO(body),
              'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
 
         middleware = self._makeOne(None)
         request.environ['PATH_INFO'] = middleware.path
-        output = StringIO('hello!')
+        output = BytesIO(bytes_('hello!'))
         html = middleware.index(request, output)
-        self.failUnless('Profiling information is generated' in html)
+        self.assertTrue('Profiling information is generated' in html)
 
     def test_index_withstats(self):
         import os
         import tempfile
-        from StringIO import StringIO
         fields = [
             ('sort', 'cumulative'),
             ('limit', '500'),
@@ -123,7 +124,7 @@ class TestProfileMiddleware(unittest.TestCase):
             ]
         content_type, body = encode_multipart_formdata(fields)
         request = self._makeRequest(
-            {'wsgi.input':StringIO(body),
+            {'wsgi.input':BytesIO(body),
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
@@ -132,20 +133,21 @@ class TestProfileMiddleware(unittest.TestCase):
         stats = DummyStats()
         middleware.Stats = stats
         f = tempfile.mktemp()
-        open(f, 'w').write('x')
-        middleware.log_filename = f
+        f = open(f, 'w')
+        f.write('x')
+        f.close()
+        middleware.log_filename = f.name
         request.environ['PATH_INFO'] = middleware.path
         middleware.index(request)
         self.assertEqual(stats.stripped, True)
-        self.failIfEqual(stats.stream, True)
+        self.assertNotEqual(stats.stream, True)
         self.assertEqual(stats.printlimit, 500)
         self.assertEqual(stats.sortspec, 'cumulative')
-        os.remove(f)
+        os.remove(f.name)
 
     def test_index_withstats_and_filename(self):
         import os
         import tempfile
-        from StringIO import StringIO
         fields = [
             ('sort', 'stats'),
             ('limit', '500'),
@@ -154,7 +156,7 @@ class TestProfileMiddleware(unittest.TestCase):
             ]
         content_type, body = encode_multipart_formdata(fields)
         request = self._makeRequest(
-            {'wsgi.input':StringIO(body),
+            {'wsgi.input':BytesIO(body),
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
@@ -163,16 +165,18 @@ class TestProfileMiddleware(unittest.TestCase):
         stats = DummyStats()
         middleware.Stats = stats
         f = tempfile.mktemp()
-        open(f, 'w').write('x')
-        middleware.log_filename = f
+        f = open(f, 'w')
+        f.write('x')
+        f.close()
+        middleware.log_filename = f.name
         request.environ['PATH_INFO'] = middleware.path
         middleware.index(request)
         self.assertEqual(stats.stripped, True)
-        self.failIfEqual(stats.stream, True)
+        self.assertNotEqual(stats.stream, True)
         self.assertEqual(stats.printlimit, 500)
         self.assertEqual(stats.filename, 'fred')
         self.assertEqual(stats.sortspec, 'stats')
-        os.remove(f)
+        os.remove(f.name)
 
     def test_app_iter_is_not_closed(self):
         middleware = self._makeOne(app)
@@ -193,10 +197,9 @@ class TestProfileMiddleware(unittest.TestCase):
         middleware = self._makeOne(_app)
         environ = self._makeEnviron({})
         middleware(environ, start_response)
-        self.failUnless(_consumed)
+        self.assertTrue(_consumed)
 
     def test_call_withpath(self):
-        from StringIO import StringIO
         fields = [
             ('fulldirs', '1'),
             ('sort', 'cumulative'),
@@ -205,7 +208,7 @@ class TestProfileMiddleware(unittest.TestCase):
             ]
         content_type, body = encode_multipart_formdata(fields)
         environ = self._makeEnviron(
-            {'wsgi.input':StringIO(body),
+            {'wsgi.input':BytesIO(body),
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
@@ -218,8 +221,8 @@ class TestProfileMiddleware(unittest.TestCase):
             statuses.append(status)
             headerses.append(headers)
         iterable = middleware(environ, start_response)
-        html = iterable[0]
-        self.failIf(html.find('There is not yet any profiling data') == -1)
+        html = text_(iterable[0])
+        self.assertFalse(html.find('There is not yet any profiling data') == -1)
         self.assertEqual(statuses[0], '200 OK')
         self.assertEqual(headerses[0][0],
                          ('content-type', 'text/html; charset="UTF-8"'))
@@ -227,7 +230,6 @@ class TestProfileMiddleware(unittest.TestCase):
 
     def test_call_discard_first_request(self):
         import os
-        from StringIO import StringIO
         import tempfile
         fields = [
             ('fulldirs', '1'),
@@ -237,13 +239,13 @@ class TestProfileMiddleware(unittest.TestCase):
             ]
         content_type, body = encode_multipart_formdata(fields)
         environ = self._makeEnviron(
-            {'wsgi.input':StringIO(body),
+            {'wsgi.input':BytesIO(body),
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
         log_filename = tempfile.mktemp()
         middleware = self._makeOne(app, log_filename=log_filename)
-        self.failUnless(middleware.first_request)
+        self.assertTrue(middleware.first_request)
         statuses = []
         headerses = []
         def start_response(status, headers, exc_info=None):
@@ -251,15 +253,14 @@ class TestProfileMiddleware(unittest.TestCase):
             headerses.append(headers)
         middleware(environ, start_response)
         self.assertEqual(statuses[0], '200 OK')
-        self.failIf(middleware.first_request)
-        self.failIf(os.path.exists(log_filename))
+        self.assertFalse(middleware.first_request)
+        self.assertFalse(os.path.exists(log_filename))
         middleware(environ, start_response)
-        self.failUnless(os.path.exists(log_filename))
+        self.assertTrue(os.path.exists(log_filename))
         os.remove(log_filename)
 
     def test_call_keep_first_request(self):
         import os
-        from StringIO import StringIO
         import tempfile
         fields = [
             ('fulldirs', '1'),
@@ -269,14 +270,14 @@ class TestProfileMiddleware(unittest.TestCase):
             ]
         content_type, body = encode_multipart_formdata(fields)
         environ = self._makeEnviron(
-            {'wsgi.input':StringIO(body),
+            {'wsgi.input':BytesIO(body),
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
         log_filename = tempfile.mktemp()
         middleware = self._makeOne(app, discard_first_request=False,
                                    log_filename=log_filename)
-        self.failIf(middleware.first_request)
+        self.assertFalse(middleware.first_request)
         statuses = []
         headerses = []
         def start_response(status, headers, exc_info=None):
@@ -284,8 +285,8 @@ class TestProfileMiddleware(unittest.TestCase):
             headerses.append(headers)
         middleware(environ, start_response)
         self.assertEqual(statuses[0], '200 OK')
-        self.failIf(middleware.first_request)
-        self.failUnless(os.path.exists(log_filename))
+        self.assertFalse(middleware.first_request)
+        self.assertTrue(os.path.exists(log_filename))
         os.remove(log_filename)
 
     def test_call_with_cachegrind(self):
@@ -293,7 +294,6 @@ class TestProfileMiddleware(unittest.TestCase):
         if not HAS_PP2CT: # pragma: no cover
             return
         import os
-        from StringIO import StringIO
         import tempfile
         fields = [
             ('fulldirs', '1'),
@@ -303,7 +303,7 @@ class TestProfileMiddleware(unittest.TestCase):
             ]
         content_type, body = encode_multipart_formdata(fields)
         environ = self._makeEnviron(
-            {'wsgi.input':StringIO(body),
+            {'wsgi.input':BytesIO(body),
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
@@ -312,7 +312,7 @@ class TestProfileMiddleware(unittest.TestCase):
         middleware = self._makeOne(app, discard_first_request=False,
                                    log_filename=log_filename,
                                    cachegrind_filename=cachegrind_filename)
-        self.failIf(middleware.first_request)
+        self.assertFalse(middleware.first_request)
         statuses = []
         headerses = []
         def start_response(status, headers, exc_info=None):
@@ -320,10 +320,10 @@ class TestProfileMiddleware(unittest.TestCase):
             headerses.append(headers)
         middleware(environ, start_response)
         self.assertEqual(statuses[0], '200 OK')
-        self.failIf(middleware.first_request)
-        self.failUnless(os.path.exists(log_filename))
+        self.assertFalse(middleware.first_request)
+        self.assertTrue(os.path.exists(log_filename))
         os.remove(log_filename)
-        self.failUnless(os.path.exists(cachegrind_filename))
+        self.assertTrue(os.path.exists(cachegrind_filename))
         os.remove(cachegrind_filename)
 
     def test_flush_at_shutdown(self):
@@ -341,8 +341,9 @@ class TestProfileMiddleware(unittest.TestCase):
                                    log_filename=log_filename)
         f = open(log_filename, 'w')
         f.write('')
+        f.close()
         del middleware
-        self.failIf(os.path.exists(log_filename))
+        self.assertFalse(os.path.exists(log_filename))
         
     def test_keep_at_shutdown(self):
         import os
@@ -359,8 +360,9 @@ class TestProfileMiddleware(unittest.TestCase):
                                    log_filename=log_filename)
         f = open(log_filename, 'w')
         f.write('')
+        f.close()
         del middleware
-        self.failUnless(os.path.exists(log_filename))
+        self.assertTrue(os.path.exists(log_filename))
         os.remove(log_filename)
 
 class TestMakeProfileMiddleware(unittest.TestCase):
@@ -475,7 +477,7 @@ def encode_multipart_formdata(fields):
         L.append(value)
     L.append('--' + BOUNDARY + '--')
     L.append('')
-    body = CRLF.join(L)
+    body = bytes_(CRLF.join(L))
     content_type = 'multipart/form-data; boundary=%s' % BOUNDARY
     return content_type, body
 
@@ -500,5 +502,4 @@ class DummyStats:
     def sort_stats(self, sort):
         self.sortspec = sort
         
-
 

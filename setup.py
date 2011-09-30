@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2007 Agendaless Consulting and Contributors.
+# Copyright (c) 2011 Agendaless Consulting and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the BSD-like license at
@@ -16,9 +16,6 @@ __version__ = '1.2'
 
 import os
 import sys
-
-from ez_setup import use_setuptools
-use_setuptools()
 
 from setuptools import setup, find_packages
 
@@ -42,6 +39,12 @@ setup(name='repoze.profile',
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2.4",
+        "Programming Language :: Python :: 2.5",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.2",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         "Topic :: Internet :: WWW/HTTP :: WSGI",
