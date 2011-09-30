@@ -51,3 +51,8 @@ except: # pragma: no cover
     from io import StringIO
     
 
+if PY3: # pragma: no cover
+    from urllib.parse import quote as url_quote
+else:
+    from urllib import quote as url_quote
+

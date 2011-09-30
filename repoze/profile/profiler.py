@@ -15,6 +15,7 @@ from repoze.profile.compat import bytes_
 from repoze.profile.compat import parse_qs
 from repoze.profile.compat import profile
 from repoze.profile.compat import StringIO
+from repoze.profile.compat import url_quote
 
 # True if we are running on Python 3.
 PY3 = sys.version_info[0] == 3
@@ -28,19 +29,6 @@ except ImportError: # pragma: no cover
 _HERE = os.path.abspath(os.path.dirname(__file__))
 
 DEFAULT_PROFILE_LOG = 'wsgi.prof'
-
-if PY3: # pragma: no cover
-    from urllib import parse
-    urlparse = parse
-    from urllib.parse import quote as url_quote
-    from urllib.parse import urlencode as url_encode
-    from urllib.request import urlopen as url_open
-else:
-    import urlparse
-    from urllib import quote as url_quote
-    from urllib import unquote as url_unquote
-    from urllib import urlencode as url_encode
-    from urllib2 import urlopen as url_open
 
 class ProfileMiddleware(object):
     Stats = pstats.Stats
