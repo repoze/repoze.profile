@@ -2,7 +2,7 @@ import sys
 
 try:
     from StringIO import StringIO as BytesIO
-except:
+except: # pragma: no cover
     from io import BytesIO
 
 # True if we are running on Python 3.
@@ -23,7 +23,7 @@ else:
     long = long
 
 def bytes_(s, encoding='utf-8', errors='strict'):
-    if isinstance(s, text_type):
+    if isinstance(s, text_type): # pragma: no cover
         return s.encode(encoding, errors)
     return s
 
@@ -45,9 +45,9 @@ try: # pragma: no cover
 except ImportError: # pragma: no cover
     import profile # pragma: no cover
 
-try:
+try: 
     from StringIO import StringIO
-except:
+except: # pragma: no cover
     from io import StringIO
     
 
