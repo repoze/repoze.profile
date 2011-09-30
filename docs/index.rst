@@ -19,8 +19,8 @@ Configuration via Python
 
 Wire up the middleware in your application::
 
- from repoze.profile.profiler import AccumulatingProfileMiddleware
- middleware = AccumulatingProfileMiddleware(
+ from repoze.profile import ProfileMiddleware
+ middleware = ProfileMiddleware(
                 app,
                 log_filename='/foo/bar.log',
                 cachegrind_filename='/foo/cachegrind.out.bar',
@@ -59,7 +59,7 @@ Wire the middleware into a pipeline in your Paste configuration, for
 example::
 
  [filter:profile]
- use = egg:repoze.profile#profile
+ use = egg:repoze.profile
  log_filename = myapp.profile
  cachegrind_filename = cachegrind.out.myapp
  discard_first_request = true

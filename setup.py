@@ -26,20 +26,13 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
-REQUIREMENTS = [
-     'meld3',
-     'Paste',
-     ]
+PY3 = sys.version_info[0] == 3
+PY25 = sys.version_info[0:2] == [2,5]
 
-if sys.version_info[:3] < (2,5,0):
-    # elementtree is only required before Python 2.5.
-    # The dependency is also not caused by ourselves but by meld3, which
-    # fails to declare it.
-    REQUIREMENTS.append('elementtree')
-else:
-    # pyprof2calltree on the other hand only works with Python 2.5 and later
-    REQUIREMENTS.append('pyprof2calltree')
+install_requires = []
 
+if not PY3 and not PY25:
+    install_requires.append('pyprof2calltree')
 
 setup(name='repoze.profile',
       version=__version__,
@@ -63,12 +56,12 @@ setup(name='repoze.profile',
       include_package_data=True,
       namespace_packages=['repoze'],
       zip_safe=False,
-      tests_require=REQUIREMENTS,
-      install_requires=REQUIREMENTS,
+      install_requires=install_requires,
       test_suite="repoze.profile.tests",
       entry_points = """\
       [paste.filter_app_factory]
       profile = repoze.profile.profiler:make_profile_middleware
+      main = repoze.profile.profiler:make_profile_middleware
       """
       )
 

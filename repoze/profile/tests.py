@@ -2,9 +2,13 @@ import unittest
 
 class TestProfileMiddleware(unittest.TestCase):
     def _makeOne(self, *arg, **kw):
-        from repoze.profile.profiler import AccumulatingProfileMiddleware
-        return AccumulatingProfileMiddleware(*arg, **kw)
-        
+        from repoze.profile.profiler import ProfileMiddleware
+        return ProfileMiddleware(*arg, **kw)
+
+    def _makeRequest(self, extra_environ):
+        environ = self._makeEnviron(extra_environ)
+        from repoze.profile.profiler import MiniRequest
+        return MiniRequest(environ)
 
     def _makeEnviron(self, kw):
         environ = {}
@@ -14,35 +18,38 @@ class TestProfileMiddleware(unittest.TestCase):
         environ['SERVER_NAME'] = 'localhost'
         environ['SERVER_PORT'] = '80'
         environ['REQUEST_METHOD'] = 'POST'
+        environ['PATH_INFO'] = '/'
         environ.update(kw)
         return environ
 
     def test_index_post(self):
         from StringIO import StringIO
         fields = [
-            ('full_dirs', '1'),
+            ('fulldirs', '1'),
             ('sort', 'cumulative'),
             ('limit', '500'),
             ('mode', 'callers'),
             ]
         content_type, body = encode_multipart_formdata(fields)
-        environ = self._makeEnviron(
-            {'wsgi.input':StringIO(body),
-             'CONTENT_TYPE':content_type,
-             'CONTENT_LENGTH':len(body),
-             'REQUEST_METHOD':'POST',
-             })
+        environ = {
+            'wsgi.input':StringIO(body),
+            'CONTENT_TYPE':content_type,
+            'CONTENT_LENGTH':len(body),
+            'REQUEST_METHOD':'POST',
+            }
         middleware = self._makeOne(None)
-        html = middleware.index(environ)
+        request = self._makeRequest(environ)
+        html = middleware.index(request)
         self.failIf(html.find('There is not yet any profiling data') == -1)
 
     def test_index_get(self):
-        environ = self._makeEnviron({
+        environ = {
              'REQUEST_METHOD':'GET',
              'wsgi.input':'',
-             })
+             }
+        request = self._makeRequest(environ)
         middleware = self._makeOne(None)
-        html = middleware.index(environ)
+        html = middleware.index(request)
         self.failIf(html.find('There is not yet any profiling data') == -1)
 
     def test_index_clear(self):
@@ -50,59 +57,59 @@ class TestProfileMiddleware(unittest.TestCase):
         from StringIO import StringIO
         import tempfile
         fields = [
-            ('full_dirs', '1'),
+            ('fulldirs', '1'),
             ('sort', 'cumulative'),
             ('limit', '500'),
             ('mode', 'callers'),
             ('clear', 'submit'),
             ]
         content_type, body = encode_multipart_formdata(fields)
-        environ = self._makeEnviron(
-            {'wsgi.input':StringIO(body),
+        environ = {
+            'wsgi.input':StringIO(body),
             'CONTENT_TYPE':content_type,
-             'CONTENT_LENGTH':len(body),
-             'REQUEST_METHOD':'POST',
-             })
+            'CONTENT_LENGTH':len(body),
+            'REQUEST_METHOD':'POST',
+             }
 
         middleware = self._makeOne(None)
         f = tempfile.mktemp()
         open(f, 'w').write('x')
         middleware.log_filename = f
-        html = middleware.index(environ)
+        request = self._makeRequest(environ)
+        html = middleware.index(request)
         self.failIf(html.find('There is not yet any profiling data') == -1)
         self.failIf(os.path.exists(f))
 
     def test_index_get_withdata(self):
         from StringIO import StringIO
-        environ = self._makeEnviron({
+        request = self._makeRequest({
              'REQUEST_METHOD':'GET',
              'wsgi.input':'',
              })
         middleware = self._makeOne(None)
         output = StringIO('hello!')
-        html = middleware.index(environ, output)
+        html = middleware.index(request, output)
         self.failUnless('Profiling information is generated' in html)
 
-    def test_index_post_withdata_full_dirs(self):
+    def test_index_post_withdata_fulldirs(self):
         from StringIO import StringIO
         fields = [
-            ('full_dirs', '1'),
+            ('fulldirs', '1'),
             ('sort', 'cumulative'),
             ('limit', '500'),
             ('mode', 'callers'),
             ]
         content_type, body = encode_multipart_formdata(fields)
-        environ = self._makeEnviron(
+        request = self._makeRequest(
             {'wsgi.input':StringIO(body),
-            'CONTENT_TYPE':content_type,
+             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
              })
 
         middleware = self._makeOne(None)
-        environ['PATH_INFO'] = middleware.path
-        middleware = self._makeOne(None)
+        request.environ['PATH_INFO'] = middleware.path
         output = StringIO('hello!')
-        html = middleware.index(environ, output)
+        html = middleware.index(request, output)
         self.failUnless('Profiling information is generated' in html)
 
     def test_index_withstats(self):
@@ -115,7 +122,7 @@ class TestProfileMiddleware(unittest.TestCase):
             ('mode', 'stats'),
             ]
         content_type, body = encode_multipart_formdata(fields)
-        environ = self._makeEnviron(
+        request = self._makeRequest(
             {'wsgi.input':StringIO(body),
             'CONTENT_TYPE':content_type,
              'CONTENT_LENGTH':len(body),
@@ -127,19 +134,51 @@ class TestProfileMiddleware(unittest.TestCase):
         f = tempfile.mktemp()
         open(f, 'w').write('x')
         middleware.log_filename = f
-        environ['PATH_INFO'] = middleware.path
-        middleware.index(environ)
+        request.environ['PATH_INFO'] = middleware.path
+        middleware.index(request)
         self.assertEqual(stats.stripped, True)
         self.failIfEqual(stats.stream, True)
         self.assertEqual(stats.printlimit, 500)
         self.assertEqual(stats.sortspec, 'cumulative')
         os.remove(f)
 
+    def test_index_withstats_and_filename(self):
+        import os
+        import tempfile
+        from StringIO import StringIO
+        fields = [
+            ('sort', 'stats'),
+            ('limit', '500'),
+            ('mode', 'fake'),
+            ('filename', 'fred'),
+            ]
+        content_type, body = encode_multipart_formdata(fields)
+        request = self._makeRequest(
+            {'wsgi.input':StringIO(body),
+            'CONTENT_TYPE':content_type,
+             'CONTENT_LENGTH':len(body),
+             })
+
+        middleware = self._makeOne(None)
+        stats = DummyStats()
+        middleware.Stats = stats
+        f = tempfile.mktemp()
+        open(f, 'w').write('x')
+        middleware.log_filename = f
+        request.environ['PATH_INFO'] = middleware.path
+        middleware.index(request)
+        self.assertEqual(stats.stripped, True)
+        self.failIfEqual(stats.stream, True)
+        self.assertEqual(stats.printlimit, 500)
+        self.assertEqual(stats.filename, 'fred')
+        self.assertEqual(stats.sortspec, 'stats')
+        os.remove(f)
+
     def test_app_iter_is_not_closed(self):
         middleware = self._makeOne(app)
         def start_response(status, headers, exc_info=None):
             pass
-        environ = {}
+        environ = self._makeEnviron({})
         iterable = middleware(environ, start_response)
         self.assertEqual(iterable.closed, False)
 
@@ -152,14 +191,14 @@ class TestProfileMiddleware(unittest.TestCase):
             yield 'one'
             _consumed.append('OK')
         middleware = self._makeOne(_app)
-        environ = {}
-        iterable = middleware(environ, start_response)
+        environ = self._makeEnviron({})
+        middleware(environ, start_response)
         self.failUnless(_consumed)
 
     def test_call_withpath(self):
         from StringIO import StringIO
         fields = [
-            ('full_dirs', '1'),
+            ('fulldirs', '1'),
             ('sort', 'cumulative'),
             ('limit', '500'),
             ('mode', 'callers'),
@@ -182,7 +221,8 @@ class TestProfileMiddleware(unittest.TestCase):
         html = iterable[0]
         self.failIf(html.find('There is not yet any profiling data') == -1)
         self.assertEqual(statuses[0], '200 OK')
-        self.assertEqual(headerses[0][0], ('content-type', 'text/html'))
+        self.assertEqual(headerses[0][0],
+                         ('content-type', 'text/html; charset="UTF-8"'))
         self.assertEqual(headerses[0][1], ('content-length', str(len(html))))
 
     def test_call_discard_first_request(self):
@@ -190,7 +230,7 @@ class TestProfileMiddleware(unittest.TestCase):
         from StringIO import StringIO
         import tempfile
         fields = [
-            ('full_dirs', '1'),
+            ('fulldirs', '1'),
             ('sort', 'cumulative'),
             ('limit', '500'),
             ('mode', 'callers'),
@@ -222,7 +262,7 @@ class TestProfileMiddleware(unittest.TestCase):
         from StringIO import StringIO
         import tempfile
         fields = [
-            ('full_dirs', '1'),
+            ('fulldirs', '1'),
             ('sort', 'cumulative'),
             ('limit', '500'),
             ('mode', 'callers'),
@@ -256,7 +296,7 @@ class TestProfileMiddleware(unittest.TestCase):
         from StringIO import StringIO
         import tempfile
         fields = [
-            ('full_dirs', '1'),
+            ('fulldirs', '1'),
             ('sort', 'cumulative'),
             ('limit', '500'),
             ('mode', 'callers'),
@@ -290,7 +330,7 @@ class TestProfileMiddleware(unittest.TestCase):
         import os
         import tempfile
         fields = [
-            ('full_dirs', '1'),
+            ('fulldirs', '1'),
             ('sort', 'cumulative'),
             ('limit', '500'),
             ('mode', 'callers'),
@@ -308,7 +348,7 @@ class TestProfileMiddleware(unittest.TestCase):
         import os
         import tempfile
         fields = [
-            ('full_dirs', '1'),
+            ('fulldirs', '1'),
             ('sort', 'cumulative'),
             ('limit', '500'),
             ('mode', 'callers'),
@@ -342,6 +382,79 @@ class TestMakeProfileMiddleware(unittest.TestCase):
         self.assertEqual(mw.first_request, True)
         self.assertEqual(mw.flush_at_shutdown, False)
         self.assertEqual(mw.path, '/__profile__')
+
+class TestMiniRequest(unittest.TestCase):
+    def _makeOne(self, environ):
+        from repoze.profile.profiler import MiniRequest
+        return MiniRequest(environ)
+    
+    def test_get_url_no_qs(self):
+        environ = {'wsgi.url_scheme': 'http',
+                   'SERVER_NAME': 'example.com',
+                   'SERVER_PORT': '80',
+                   'SCRIPT_NAME': '/script',
+                   'PATH_INFO': '/path/info',
+                  }
+        req = self._makeOne(environ)
+        self.assertEqual(req.get_url(), 'http://example.com/script/path/info')
+
+    def test_get_url_w_qs(self):
+        environ = {'wsgi.url_scheme': 'http',
+                   'SERVER_NAME': 'example.com',
+                   'SERVER_PORT': '80',
+                   'SCRIPT_NAME': '/script',
+                   'PATH_INFO': '/path/info',
+                   'QUERY_STRING': 'foo=bar&baz=bam'
+                  }
+        req = self._makeOne(environ)
+        self.assertEqual(req.get_url(),
+                         'http://example.com/script/path/info?foo=bar&baz=bam')
+
+    def test_get_url_w_httphost_withport(self):
+        environ = {'wsgi.url_scheme': 'http',
+                   'SERVER_NAME': 'example.com',
+                   'SERVER_PORT': '80',
+                   'SCRIPT_NAME': '/script',
+                   'PATH_INFO': '/path/info',
+                   'HTTP_HOST': 'localhost:8080'
+                  }
+        req = self._makeOne(environ)
+        self.assertEqual(req.get_url(),
+                         'http://localhost:8080/script/path/info')
+    
+    def test_get_url_w_httphost_noport(self):
+        environ = {'wsgi.url_scheme': 'http',
+                   'SERVER_NAME': 'example.com',
+                   'SERVER_PORT': '80',
+                   'SCRIPT_NAME': '/script',
+                   'PATH_INFO': '/path/info',
+                   'HTTP_HOST': 'localhost'
+                  }
+        req = self._makeOne(environ)
+        self.assertEqual(req.get_url(),
+                         'http://localhost/script/path/info')
+
+    def test_get_url_https(self):
+        environ = {'wsgi.url_scheme': 'https',
+                   'SERVER_NAME': 'example.com',
+                   'SERVER_PORT': '443',
+                   'SCRIPT_NAME': '/script',
+                   'PATH_INFO': '/path/info',
+                  }
+        req = self._makeOne(environ)
+        self.assertEqual(req.get_url(),
+                         'https://example.com/script/path/info')
+    
+    def test_get_url_https_withport(self):
+        environ = {'wsgi.url_scheme': 'https',
+                   'SERVER_NAME': 'example.com',
+                   'SERVER_PORT': '553',
+                   'SCRIPT_NAME': '/script',
+                   'PATH_INFO': '/path/info',
+                  }
+        req = self._makeOne(environ)
+        self.assertEqual(req.get_url(),
+                         'https://example.com:553/script/path/info')
         
 def app(environ, start_response, exc_info=None):
     start_response('200 OK', (), exc_info)
@@ -379,6 +492,10 @@ class DummyStats:
 
     def print_stats(self, limit):
         self.printlimit = limit
+
+    def print_fake(self, filename, limit):
+        self.printlimit = limit
+        self.filename = filename
 
     def sort_stats(self, sort):
         self.sortspec = sort

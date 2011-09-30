@@ -11,6 +11,20 @@ Next release
   to view profile data as it's being generated.  Closes
   http://bugs.repoze.org/issue168.
 
+- Removed these dependencies: ``meld3``, ``paste``.
+
+- A new ``paste.filter_app_factory`` entry point has been added named
+  ``main`` which points to the profiler.  This allows for the simplified
+  spelling ``egg:repoze.profile`` in paste.ini files when referring to the
+  profile middleware.
+
+- The new canonical import location for the profiling middleware is
+  ``repoze.profile.ProfileMiddleware``.  Older imports continue to work.
+
+- You may now notice a function named
+  ``repoze.profile.profiler.get_app_iter`` in profiling output; this is the
+  function that calls the downstream WSGI application.
+
 1.2 (2010-11-25)
 ----------------
 
