@@ -30,6 +30,17 @@ _HERE = os.path.abspath(os.path.dirname(__file__))
 
 DEFAULT_PROFILE_LOG = 'wsgi.prof'
 
+PROFILE_EXEC = """
+app_iter = self.app(environ, start_response)
+if isinstance(app_iter, types.GeneratorType):
+    # unwind the generator; it may call start_response
+    app_iter_ = list(app_iter)
+    if hasattr(app_iter, 'close'):
+        app_iter.close()
+else:
+    app_iter_ = app_iter
+"""
+
 class ProfileMiddleware(object):
     Stats = pstats.Stats
 
@@ -162,9 +173,7 @@ class ProfileMiddleware(object):
         self.lock.acquire()
         try:
             _locals = locals()
-            self.profiler.runctx(
-                'app_iter = request.get_app_iter(self.app, start_response)',
-                globals(), _locals)
+            self.profiler.runctx(PROFILE_EXEC, globals(), _locals)
 
             if self.first_request: # discard to avoid timing warm-up
                 self.profiler = profile.Profile()
@@ -182,7 +191,7 @@ class ProfileMiddleware(object):
                         if grind is not None:
                             grind.close()
 
-            app_iter = _locals['app_iter']
+            app_iter = _locals['app_iter_']
             return app_iter
         finally:
             self.lock.release()
@@ -353,17 +362,6 @@ class MiniRequest(object):
                               strict_parsing=False)
         params.update(get_params)
         return params
-
-    def get_app_iter(self, app, start_response):
-        app_iter = app(self.environ, start_response)
-        if isinstance(app_iter, types.GeneratorType):
-            # unwind the generator; it may call start_response
-            result = list(app_iter)
-            if hasattr(app_iter, 'close'):
-                app_iter.close()
-        else:
-            result = app_iter
-        return result
 
 AccumulatingProfileMiddleware = ProfileMiddleware # bw compat
 
