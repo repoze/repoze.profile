@@ -26,7 +26,8 @@ Wire up the middleware in your application::
                 cachegrind_filename='/foo/cachegrind.out.bar',
                 discard_first_request=True,
                 flush_at_shutdown=True,
-                path='/__profile__'
+                path='/__profile__',
+                unwind=False,
                )
 
 The configuration options are as follows::
@@ -51,6 +52,12 @@ The configuration options are as follows::
  - ``path`` is the URL path to the profiler UI.  It defaults to
    ``/__profile__``.
 
+ - ``unwind`` is a configuration flag which indicates whether the app_iter
+   returned by the downstream application should unwound and its results read
+   into memory.  Setting this to true is useful for applications which use
+   generators or other iterables to do "real work" that you'd like to
+   profile, at the expense of consuming a lot of memory if you hit a URL
+   which returns a lot of data.  It defaults to false.
 
 Configuration via Paste
 -----------------------
@@ -65,6 +72,7 @@ example::
  discard_first_request = true
  path = /__profile__
  flush_at_shutdown = true
+ unwind = false
  ...
 
  [pipeline:main]

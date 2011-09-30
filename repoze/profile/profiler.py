@@ -9,7 +9,6 @@ import pstats
 import string
 import sys
 import threading
-import types
 
 from repoze.profile.compat import bytes_
 from repoze.profile.compat import parse_qs
@@ -30,15 +29,17 @@ _HERE = os.path.abspath(os.path.dirname(__file__))
 
 DEFAULT_PROFILE_LOG = 'wsgi.prof'
 
-PROFILE_EXEC = """
+PROFILE_EXEC_EAGER = """
+# unwind the iterator; it may call start_response, do lots of work, etc
 app_iter = self.app(environ, start_response)
-if isinstance(app_iter, types.GeneratorType):
-    # unwind the generator; it may call start_response
-    app_iter_ = list(app_iter)
-    if hasattr(app_iter, 'close'):
-        app_iter.close()
-else:
-    app_iter_ = app_iter
+app_iter_ = list(app_iter)
+if hasattr(app_iter, 'close'):
+    app_iter.close()
+"""
+
+PROFILE_EXEC_LAZY = """
+# don't unwind the iterator (dont consume resources)
+app_iter_ = self.app(environ, start_response)
 """
 
 class ProfileMiddleware(object):
@@ -51,6 +52,7 @@ class ProfileMiddleware(object):
                  discard_first_request=True,
                  flush_at_shutdown = True,
                  path='/__profile__',
+                 unwind=False,
                 ):
         self.exists = os.path.exists # for __del__
         self.remove = os.remove # for __del__
@@ -62,6 +64,7 @@ class ProfileMiddleware(object):
         self.lock = threading.Lock()
         self.flush_at_shutdown = flush_at_shutdown
         self.path = path
+        self.unwind = unwind
 
     def index(self, request, output=None): # output=None D/I for testing
         querydata = request.get_params()
@@ -173,7 +176,8 @@ class ProfileMiddleware(object):
         self.lock.acquire()
         try:
             _locals = locals()
-            self.profiler.runctx(PROFILE_EXEC, globals(), _locals)
+            code = self.unwind and PROFILE_EXEC_EAGER or PROFILE_EXEC_LAZY
+            self.profiler.runctx(code, globals(), _locals)
 
             if self.first_request: # discard to avoid timing warm-up
                 self.profiler = profile.Profile()
@@ -372,6 +376,7 @@ def make_profile_middleware(app,
                             discard_first_request='true',
                             path='/__profile__',
                             flush_at_shutdown='true',
+                            unwind='false',
                            ):
     """Wrap the application in a component that will profile each
     request, appending data from each request to an aggregate
@@ -388,12 +393,14 @@ def make_profile_middleware(app,
     """
     flush_at_shutdown = boolean(flush_at_shutdown)
     discard_first_request = boolean(discard_first_request)
+    unwind = boolean(unwind)
         
     return ProfileMiddleware(
-                app,
-                log_filename=log_filename,
-                cachegrind_filename=cachegrind_filename,
-                discard_first_request=discard_first_request,
-                flush_at_shutdown=flush_at_shutdown,
-                path=path,
-               )
+        app,
+        log_filename=log_filename,
+        cachegrind_filename=cachegrind_filename,
+        discard_first_request=discard_first_request,
+        flush_at_shutdown=flush_at_shutdown,
+        path=path,
+        unwind=unwind,
+        )

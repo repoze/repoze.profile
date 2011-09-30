@@ -186,7 +186,7 @@ class TestProfileMiddleware(unittest.TestCase):
         iterable = middleware(environ, start_response)
         self.assertEqual(iterable.closed, False)
 
-    def test_app_iter_as_generator_is_consumed(self):
+    def test_app_iter_as_generator_is_consumed_when_unwind_true(self):
         _consumed = []
         def start_response(status, headers, exc_info=None):
             pass
@@ -194,10 +194,23 @@ class TestProfileMiddleware(unittest.TestCase):
             start_response('200 OK', (), exc_info)
             yield 'one'
             _consumed.append('OK')
-        middleware = self._makeOne(_app)
+        middleware = self._makeOne(_app, unwind=True)
         environ = self._makeEnviron({})
         middleware(environ, start_response)
         self.assertTrue(_consumed)
+
+    def test_app_iter_as_generator_is_not_consumed_when_unwind_false(self):
+        _consumed = []
+        def start_response(status, headers, exc_info=None): # pragma: no cover
+            pass
+        def _app(status, headers, exc_info=None): # pragma: no cover
+            start_response('200 OK', (), exc_info)
+            yield 'one'
+            _consumed.append('OK')
+        middleware = self._makeOne(_app, unwind=False)
+        environ = self._makeEnviron({})
+        middleware(environ, start_response)
+        self.assertFalse(_consumed)
 
     def test_call_withpath(self):
         fields = [

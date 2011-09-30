@@ -1,6 +1,18 @@
 ``repoze.profile`` Changelog
 ============================
 
+Next release
+------------
+
+- Added an ``unwind`` configuration option.  If ``unwind`` is True, the
+  iterable returned by the downstream application will be consumed and turned
+  into a list during profiling.  This allows you to profile applications
+  which return generators or other iterables that do "real work".
+
+- Applications which return generators that do "real work" will now need to
+  supply the ``unwind`` flag to configuration to see that work in profile
+  output.
+
 1.3 (2011-09-30)
 ----------------
 
