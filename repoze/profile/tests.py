@@ -355,7 +355,10 @@ class TestProfileMiddleware(unittest.TestCase):
         f = open(log_filename, 'w')
         f.write('')
         f.close()
-        del middleware
+        # We can't do the following:
+        # del middleware
+        # because it won't get called right away under PyPy.
+        middleware.__del__()
         self.assertFalse(os.path.exists(log_filename))
         
     def test_keep_at_shutdown(self):
