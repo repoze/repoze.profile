@@ -29,6 +29,8 @@ install_requires = []
 if not PY3 and not PY25:
     install_requires.append('pyprof2calltree')
 
+testing_extras = install_requires + ['nose', 'coverage']
+
 setup(name='repoze.profile',
       version='1.3',
       description='Aggregate profiling for WSGI requests',
@@ -58,11 +60,15 @@ setup(name='repoze.profile',
       namespace_packages=['repoze'],
       zip_safe=False,
       install_requires=install_requires,
+      tests_require=install_requires,
       test_suite="repoze.profile.tests",
       entry_points = """\
       [paste.filter_app_factory]
       profile = repoze.profile.profiler:make_profile_middleware
       main = repoze.profile.profiler:make_profile_middleware
-      """
-      )
+      """,
+      extras_require = {
+        'testing':  testing_extras,
+      }
+)
 
