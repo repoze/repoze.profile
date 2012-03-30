@@ -1,8 +1,11 @@
 ``repoze.profile`` Changelog
 ============================
 
-Next release
-------------
+1.4 (2012-03-29)
+----------------
+
+- This release is the last which will maintain support for Python 2.4 /
+  Python 2.5.
 
 - Added an ``unwind`` configuration option.  If ``unwind`` is True, the
   iterable returned by the downstream application will be consumed and turned
