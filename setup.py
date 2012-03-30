@@ -22,25 +22,22 @@ README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 PY3 = sys.version_info[0] == 3
-PY25 = sys.version_info[0:2] == [2,5]
 
 install_requires = []
 
-if not PY3 and not PY25:
+if not PY3:
     install_requires.append('pyprof2calltree')
 
 testing_extras = install_requires + ['nose', 'coverage']
 
 setup(name='repoze.profile',
-      version='1.4',
+      version='1.5dev',
       description='Aggregate profiling for WSGI requests',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.4",
-        "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
