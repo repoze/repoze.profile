@@ -69,6 +69,7 @@ setup(name='repoze.profile',
       """,
       extras_require = {
         'testing':  testing_extras,
+        'docs': ['Sphinx'],
       }
 )
 

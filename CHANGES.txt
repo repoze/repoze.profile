@@ -4,6 +4,8 @@
 Next release
 ------------
 
+- Add ``setup.py docs`` alias (installs Sphinx).
+
 - Note support for PyPy.
 
 - Add support for Python 3.3.
