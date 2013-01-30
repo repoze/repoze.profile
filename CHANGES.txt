@@ -4,6 +4,8 @@
 Next release
 ------------
 
+- Add support for building docs / exercising doctest snippets under ``tox``.
+
 - Add ``setup.py docs`` alias (installs Sphinx).
 
 - Note support for PyPy.
