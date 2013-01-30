@@ -31,7 +31,7 @@ if not PY3:
 testing_extras = install_requires + ['nose', 'coverage']
 
 setup(name='repoze.profile',
-      version='1.5dev',
+      version='2.0b1',
       description='Aggregate profiling for WSGI requests',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[

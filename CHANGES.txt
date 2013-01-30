@@ -1,8 +1,8 @@
 ``repoze.profile`` Changelog
 ============================
 
-Next release
-------------
+2.0b1 (2013-01-30)
+------------------
 
 - Add support for building docs / exercising doctest snippets under ``tox``.
 
