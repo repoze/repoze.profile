@@ -12,3 +12,4 @@ dist/
 nosetests.xml
 repoze/profile/coverage.xml
 env*/
+docs/_build
