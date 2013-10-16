@@ -102,8 +102,8 @@ in your browser to see a user interface displaying profiling statistics
 Reporting Bugs / Development Versions
 -------------------------------------
 
-Visit http://bugs.repoze.org to report bugs.  Visit
-http://svn.repoze.org to download development or tagged versions.
+Visit https://github.com/repoze/repoze.profile/issues to report bugs.  Visit
+https://githug.com/repoze/repoze.profile to checkout a development version.
 
 .. toctree::
    :maxdepth: 2
