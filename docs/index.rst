@@ -102,8 +102,8 @@ in your browser to see a user interface displaying profiling statistics
 Reporting Bugs / Development Versions
 -------------------------------------
 
-Visit https://github.com/repoze/repoze.profile/issues to report bugs.  Visit
-https://githug.com/repoze/repoze.profile to checkout a development version.
+Visit https://github.com/repoze/repoze.profile/ to report bugs.  Fork
+the repository to submit patches as pull requests.
 
 .. toctree::
    :maxdepth: 2
