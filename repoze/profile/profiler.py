@@ -189,7 +189,7 @@ class ProfileMiddleware(object):
                     conv = pyprof2calltree.CalltreeConverter(stats)
                     grind = None
                     try:
-                        grind = file(self.cachegrind_filename, 'wb')
+                        grind = open(self.cachegrind_filename, 'w')
                         conv.output(grind)
                     finally:
                         if grind is not None:
