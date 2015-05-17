@@ -10,7 +10,7 @@ env:
   - TOXENV=py34
   - TOXENV=pypy
   - TOXENV=pypy3
-  - TOXENV=cover
+  - TOXENV=coverage
 
 install:
   - travis_retry pip install tox
