@@ -187,14 +187,8 @@ class ProfileMiddleware(object):
                 if HAS_PP2CT and self.cachegrind_filename is not None:
                     stats = pstats.Stats(self.profiler)
                     conv = pyprof2calltree.CalltreeConverter(stats)
-                    grind = None
-                    try:
-                        grind = open(self.cachegrind_filename, 'w')
+                    with open(self.cachegrind_filename, 'w') as grind:
                         conv.output(grind)
-                    finally:
-                        if grind is not None:
-                            grind.close()
-
             app_iter = _locals['app_iter_']
             return app_iter
         finally:
