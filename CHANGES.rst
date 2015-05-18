@@ -4,6 +4,8 @@
 2.1 (unreleased)
 ----------------
 
+- Add support for testing on Travis-CI.
+
 - Add support for Python 3.4.
 
 2.0 (2013-04-08)
