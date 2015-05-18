@@ -1,7 +1,7 @@
 ``repoze.profile`` Changelog
 ============================
 
-2.1 (unreleased)
+2.1 (2015-05-28)
 ----------------
 
 - Add support for testing on Travis-CI.
