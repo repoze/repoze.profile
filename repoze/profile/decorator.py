@@ -2,7 +2,7 @@ import pstats
 
 from repoze.profile.compat import profile as python_profile
 
-def profile(title, sort_columns=('cumtime', 'time'), lines=20, stripdirs=True):
+def profile(title, sort_columns=('cumulative', 'time'), lines=20, stripdirs=True):
     def decorator(f):
         def wrapper(*args, **kw):
             profiler = python_profile.Profile()
