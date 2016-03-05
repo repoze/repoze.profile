@@ -13,15 +13,15 @@ def profile(title, sort_columns=('cumulative', 'time'), lines=20, stripdirs=True
             if stripdirs:
                 stats.strip_dirs()
             stats.sort_stats(*sort_columns)
-            print "-" * 80
+            print("-" * 80)
             print
-            print title
-            print
+            print(title)
+            print("")
             if lines == 0:
                 stats.print_stats()
             else:
                 stats.print_stats(lines)
-            print
+            print("")
             return result
         return wrapper
     return decorator

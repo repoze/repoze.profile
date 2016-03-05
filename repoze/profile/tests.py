@@ -1,9 +1,9 @@
 import unittest
 import sys
-from StringIO import StringIO
 
 from repoze.profile.compat import BytesIO
 from repoze.profile.compat import bytes_
+from repoze.profile.compat import StringIO
 from repoze.profile.compat import text_
 
 class TestProfileMiddleware(unittest.TestCase):
