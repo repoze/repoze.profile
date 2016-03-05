@@ -478,6 +478,19 @@ class TestMiniRequest(unittest.TestCase):
 
 class TestProfileDecorator(unittest.TestCase):
 
+    def test_w_lines_eq_zero(self):
+        from repoze.profile.decorator import profile
+        @profile('test function', lines=0)
+        def do_nothing():
+            pass
+        out = StringIO()
+        old_out = sys.stdout
+        sys.stdout = out
+        do_nothing()
+        assert 'test function' in out.getvalue()
+        assert 'Ordered by: cumulative time' in out.getvalue()
+        sys.stdout = old_out
+
     def test_it(self):
         from repoze.profile.decorator import profile
         @profile('test function')
