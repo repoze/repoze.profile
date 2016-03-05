@@ -99,6 +99,31 @@ in your browser to see a user interface displaying profiling statistics
 .. image:: _static/profile_browser.png
 
 
+Profiling individual functions
+------------------------------
+
+Sometimes it might be needed to profile a specific function, be it for
+analyzing a bottleneck found with the full profiling, or to compare different
+approaches to the same problem. This package provides a decorator for this
+case. To use it, simply decorate the desired function like this::
+
+.. code-block:: python
+
+from repoze.profile.decorator import profile
+
+@profile('Descriptive title', sort_columns=('time', 'cumtime'), lines=30)
+my_bottleneck()
+    # some really time consuming code
+    ...
+
+
+The results of the profiling will be sent to standard out. The ``title`` will
+appear at the top of the results, for guidance. All other arguments are
+optional. ``sort_columns`` allows specifying the columns to sort the timing
+results. See the Python profilers documentation for available options. ``lines``
+is the number of lines of results to print. Default is 20. Zero means no limit.
+
+
 Reporting Bugs / Development Versions
 -------------------------------------
 

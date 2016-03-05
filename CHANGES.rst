@@ -4,6 +4,8 @@
 2.2 (unreleased)
 ----------------
 
+- Add decorator for profiling individual functions.
+
 - Deprecate support for Python 2.6:  to be removed in 2.3.
 
 - Drop support for Python 3.2.  ``pip`` and testing tools no longer

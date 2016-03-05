@@ -1,7 +1,9 @@
 import unittest
+import sys
 
 from repoze.profile.compat import BytesIO
 from repoze.profile.compat import bytes_
+from repoze.profile.compat import StringIO
 from repoze.profile.compat import text_
 
 class TestProfileMiddleware(unittest.TestCase):
@@ -473,6 +475,60 @@ class TestMiniRequest(unittest.TestCase):
         req = self._makeOne(environ)
         self.assertEqual(req.get_url(),
                          'https://example.com:553/script/path/info')
+
+class TestProfileDecorator(unittest.TestCase):
+
+    def test_w_lines_eq_zero(self):
+        from repoze.profile.decorator import profile
+        @profile('test function', lines=0)
+        def do_nothing():
+            pass
+        out = StringIO()
+        old_out = sys.stdout
+        sys.stdout = out
+        do_nothing()
+        assert 'test function' in out.getvalue()
+        assert 'Ordered by: cumulative time' in out.getvalue()
+        sys.stdout = old_out
+
+    def test_it(self):
+        from repoze.profile.decorator import profile
+        @profile('test function')
+        def do_nothing():
+            pass
+        out = StringIO()
+        old_out = sys.stdout
+        sys.stdout = out
+        do_nothing()
+        assert 'test function' in out.getvalue()
+        assert 'Ordered by: cumulative time' in out.getvalue()
+        sys.stdout = old_out
+        
+    def test_sort_columns(self):
+        from repoze.profile.decorator import profile
+        @profile('test sort columns', sort_columns=('time',))
+        def do_nothing():
+            pass
+        out = StringIO()
+        old_out = sys.stdout
+        sys.stdout = out
+        do_nothing()
+        assert 'test sort columns' in out.getvalue()
+        assert 'Ordered by: internal time' in out.getvalue()
+        sys.stdout = old_out
+        
+    def test_limit_lines(self):
+        from repoze.profile.decorator import profile
+        @profile('test limit lines', lines=1)
+        def do_nothing():
+            pass
+        out = StringIO()
+        old_out = sys.stdout
+        sys.stdout = out
+        do_nothing()
+        assert 'test limit lines' in out.getvalue()
+        assert '1 due to restriction' in out.getvalue()
+        sys.stdout = old_out
         
 def app(environ, start_response, exc_info=None):
     start_response('200 OK', (), exc_info)
