@@ -4,6 +4,8 @@
 2.2 (unreleased)
 ----------------
 
+- Add decorator for profiling individual functions.
+
 2.1 (2015-05-28)
 ----------------
 

@@ -104,3 +104,4 @@ Contributors
 ------------
 
 - Tres Seaver, 2011/03/22
+- Carlos de la Guardia, 2016/03/05
