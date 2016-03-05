@@ -4,6 +4,11 @@
 2.2 (unreleased)
 ----------------
 
+- Deprecate support for Python 2.6:  to be removed in 2.3.
+
+- Drop support for Python 3.2.  ``pip`` and testing tools no longer
+  support it.
+
 2.1 (2015-05-28)
 ----------------
 
