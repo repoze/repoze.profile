@@ -1,7 +1,7 @@
 ``repoze.profile`` Changelog
 ============================
 
-2.2 (unreleased)
+2.2 (2016-06-03)
 ----------------
 
 - Add decorator for profiling individual functions.
