@@ -6,6 +6,8 @@
 
 - Add decorator for profiling individual functions.
 
+- Add support for Python 3.5.
+
 - Drop support for Python 2.6 and Python 3.2.
 
 2.1 (2015-05-28)
