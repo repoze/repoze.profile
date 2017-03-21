@@ -105,16 +105,15 @@ Profiling individual functions
 Sometimes it might be needed to profile a specific function, be it for
 analyzing a bottleneck found with the full profiling, or to compare different
 approaches to the same problem. This package provides a decorator for this
-case. To use it, simply decorate the desired function like this::
+case. To use it, simply decorate the desired function like this:
 
 .. code-block:: python
 
-from repoze.profile.decorator import profile
+   from repoze.profile.decorator import profile
 
-@profile('Descriptive title', sort_columns=('time', 'cumtime'), lines=30)
-my_bottleneck()
-    # some really time consuming code
-    ...
+   @profile('Descriptive title', sort_columns=('time', 'cumtime'), lines=30)
+   def my_bottleneck():
+       # some really time consuming code
 
 
 The results of the profiling will be sent to standard out. The ``title`` will
