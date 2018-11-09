@@ -4,7 +4,9 @@
 2.3 (unreleased)
 ----------------
 
-- TBD
+- Add support for Python 3.6 and 3.7.
+
+- Drop support for Python 3.3.
 
 2.2 (2016-06-03)
 ----------------
@@ -87,7 +89,7 @@
 - Converted documentation to Sphinx.
 
 - Ensure we consume generators returned by the wrapped application.
-  Fixes http://bugs.repoze.org/issue169 
+  Fixes http://bugs.repoze.org/issue169
 
 1.1 (2009-10-06)
 ----------------
