@@ -14,12 +14,16 @@ matrix:
       dist: xenial
       sudo: true
       env: TOXENV=py37
+  include:
+    - python: "pypy"
+      env: TOXENV=pypy
+  include:
+    - python: "pypy3"
+      env: TOXENV=pypy3
 
 env:
   - TOXENV=py27
   - TOXENV=py34
-  - TOXENV=pypy
-  - TOXENV=pypy3
   - TOXENV=coverage
 
 install:
