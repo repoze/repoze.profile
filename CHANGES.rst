@@ -1,7 +1,7 @@
 ``repoze.profile`` Changelog
 ============================
 
-2.3 (unreleased)
+2.3 (2018-11-12)
 ----------------
 
 - Add support for Python 3.6 and 3.7.
